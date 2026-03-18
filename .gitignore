@@ -1,13 +1,31 @@
-# Developer tools' files
-.lite_workspace.lua
+# Neutralinojs
+.tmp/
+dist/
+bin/
+test_zip/
+*.neu
+*.exe
+neutralino-win_x64.exe
+neutralino-linux_x64
+neutralino-mac_x64
 
-# Neutralinojs binaries and builds
-/bin
-/dist
+# Visual Studio / IDE
+.vs/
+*.user
+*.suo
+*.sln
 
-# Neutralinojs client (minified)
-neutralino.js
+# Distribution
+*.zip
+*.msi
 
-# Neutralinojs related files
-.storage
+# Logs
 *.log
+npm-debug.log*
+
+# Node
+node_modules/
+
+# OS
+Thumbs.db
+.DS_Store
