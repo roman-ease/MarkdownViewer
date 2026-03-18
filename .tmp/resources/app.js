@@ -792,7 +792,16 @@ async function reloadFile() {
  */
 function loadRecentFiles() {
   try {
-    const saved = localStorage.getItem('markdown_recent_files');
+    let saved = localStorage.getItem('markdown_recent_files');
+    // 旧タイポキーからの移行
+    if (!saved) {
+      saved = localStorage.getItem('merkdown_recent_files');
+      if (saved) {
+        localStorage.setItem('markdown_recent_files', saved);
+        localStorage.removeItem('merkdown_recent_files');
+      }
+    }
+    
     if (saved) {
       state.recentFiles = JSON.parse(saved);
     }
@@ -854,7 +863,7 @@ function renderRecentMenu() {
         showError('ファイルが見つかりません', '移動または削除された可能性があります。');
         // エラーになれば履歴から削除
         state.recentFiles = state.recentFiles.filter(p => p !== path);
-        localStorage.setItem('merkdown_recent_files', JSON.stringify(state.recentFiles));
+        localStorage.setItem('markdown_recent_files', JSON.stringify(state.recentFiles));
         renderRecentMenu();
       }
     });
@@ -1313,26 +1322,20 @@ function renderTabs() {
 // ============================================================
 
 /**
- * シングルインスタンス化の初期化
- * 既に起動中のプロセスがあれば、引数を渡して自身を終了する
- */
-/**
- * シングルインスタンス化の初期化 (v1.2.0: 安定版)
- * 既に起動中のプロセスがあれば、引数を渡して自身を終了する
+ * シングルインスタンス通信 (v1.3.0: 高速版)
  */
 async function initIPC() {
   try {
     state.isPrimaryInstance = true;
     state.lastIpcTimestamp = 0;
     
-    // 1. 既存のプライマリ情報をストレージから取得
     let primaryInfo = null;
     try {
       const data = await Neutralino.storage.getData('primary_info');
       primaryInfo = JSON.parse(data);
     } catch(e) {}
 
-    // 2. 既存PIDの生存確認
+    // 既存プロセスの生存確認
     if (primaryInfo && primaryInfo.pid) {
       const pid = primaryInfo.pid;
       try {
@@ -1340,25 +1343,20 @@ async function initIPC() {
         if (checkCmd.stdOut.includes(`"${pid}"`) && pid.toString() !== NL_PID.toString()) {
           state.isPrimaryInstance = false;
         }
-      } catch(e) {
-        // tasklistが失敗した場合は念のため単独起動
-      }
+      } catch(e) {}
     }
 
     if (state.isPrimaryInstance) {
-      // --- プライマリとしての動作 ---
+      // --- プライマリ：メッセージの受信待機 ---
       await Neutralino.storage.setData('primary_info', JSON.stringify({ pid: NL_PID, timestamp: Date.now() }));
       
-      // 起動時点のメッセージは既読にする（二重処理防止）
       try {
         const lastMsgData = await Neutralino.storage.getData('ipc_message');
         if (lastMsgData) {
-          const lastMsg = JSON.parse(lastMsgData);
-          state.lastIpcTimestamp = lastMsg.timestamp || 0;
+          state.lastIpcTimestamp = JSON.parse(lastMsgData).timestamp || 0;
         }
       } catch(e) {}
 
-      // ポーリング開始
       const pollStorage = async () => {
         if (state.isIpcClosed) return;
         try {
@@ -1382,16 +1380,15 @@ async function initIPC() {
             }
           }
         } catch(e) {} finally {
-          if (!state.isIpcClosed) setTimeout(pollStorage, 800);
+          if (!state.isIpcClosed) setTimeout(pollStorage, 200); // 高速監視 (200ms)
         }
       };
-      setTimeout(pollStorage, 800);
+      setTimeout(pollStorage, 200);
 
     } else {
-      // --- セカンダリとしての動作 ---
+      // --- セカンダリ：引数をプライマリに転送して終了 ---
       let cwd = NL_CWD;
       try {
-        // NL_CWDが正しくない場合があるため、環境変数も考慮
         cwd = await Neutralino.os.getEnv('PWD') || await Neutralino.os.getEnv('CD') || NL_CWD;
       } catch(e) {}
 
@@ -1401,7 +1398,6 @@ async function initIPC() {
         const lowArg = arg.toLowerCase();
         if (lowArg.endsWith('.exe') || lowArg.includes('markdownviewer') || lowArg.includes('neu')) continue;
         
-        // 絶対パス化
         let fullPath = arg;
         if (!(/^[a-zA-Z]:\\/.test(fullPath) || fullPath.startsWith('/') || fullPath.startsWith('\\\\'))) {
           fullPath = cwd.replace(/[\\/]+$/, '') + '\\' + fullPath;
@@ -1415,14 +1411,12 @@ async function initIPC() {
           timestamp: Date.now(),
           senderPid: NL_PID
         }));
-        // 書き込み反映を待つ
-        await new Promise(r => setTimeout(r, 600));
+        await new Promise(r => setTimeout(r, 220)); // 書き込み完了を待機して高速終了
       }
       
       await Neutralino.app.exit(0);
     }
   } catch(err) {
-    // 予期せぬエラー：単独起動させる
     state.isPrimaryInstance = true;
   }
 }
