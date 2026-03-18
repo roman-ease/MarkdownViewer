@@ -1325,8 +1325,9 @@ async function initIPC() {
       if (primaryPid && /^\d+$/.test(primaryPid.trim())) {
         const pid = primaryPid.trim();
         // tasklist で PID が生存しているか確認
-        const checkCmd = await Neutralino.os.execCommand(`tasklist /FI "PID eq ${pid}" /NH`);
-        if (checkCmd.stdOut.includes(pid)) {
+        // 日本語・英語両OSに対応するため、特定の文言ではなく出力のPID列をチェック
+        const checkCmd = await Neutralino.os.execCommand(`tasklist /FI "PID eq ${pid}" /NH /FO CSV`);
+        if (checkCmd.stdOut.includes(`"${pid}"`)) {
           state.isPrimaryInstance = false;
         }
       }
@@ -1346,44 +1347,49 @@ async function initIPC() {
         }
       } catch(e) {}
 
-      // ポーリング用関数の定義（重複動作を防ぐため、setTimeout を再帰的に呼び出す）
+      // ポーリング用関数の定義
       let isIpcPolling = false;
       const pollIpc = async () => {
         if (state.isIpcClosed || isIpcPolling) return;
         isIpcPolling = true;
 
         try {
-          // ipcDir (ローカル変数) を使用
           const folderEntries = await Neutralino.filesystem.readDirectory(ipcDir);
           for (const entry of folderEntries) {
-            // メッセージファイルのみを対象にする
             if (entry.type === 'FILE' && entry.entry.startsWith('msg_')) {
               const msgPath = ipcDir + '\\' + entry.entry;
               
               try {
                 const content = await Neutralino.filesystem.readFile(msgPath);
-                // 読み込めたら、再処理されないように直ちに削除
                 await Neutralino.filesystem.removeFile(msgPath);
                 
                 const data = JSON.parse(content);
                 if (data && data.args) {
+                  let addedCount = 0;
                   for (let i = 1; i < data.args.length; i++) {
                     const arg = data.args[i];
                     if (arg && !arg.startsWith('--')) {
                       await loadFile(arg);
+                      addedCount++;
                     }
                   }
-                  // ウィンドウを前面に出す
-                  await Neutralino.window.show();
-                  await Neutralino.window.focus();
+                  
+                  if (addedCount > 0) {
+                    await Neutralino.window.show();
+                    await Neutralino.window.focus();
+                    
+                    // 成功通知（任意）
+                    try {
+                      await Neutralino.os.showNotification('ファイル受診', `${addedCount} 個のファイルを追加しました。`);
+                    } catch(e) {}
+                  }
                 }
               } catch (e) {
-                // readFile や removeFile が失敗した場合は無視
+                // readFile や removeFile が失敗した場合は他プロセスが処理済み
               }
             }
           }
         } catch (err) {
-          // ディレクトリ読み込みエラー等
         } finally {
           isIpcPolling = false;
           if (!state.isIpcClosed) {
@@ -1392,14 +1398,13 @@ async function initIPC() {
         }
       };
 
-      // 最初のポーリングを開始
       setTimeout(pollIpc, 200);
       
     } else {
       // セカンダリ：引数送信して終了
       const msgFile = ipcDir + '\\msg_' + Date.now() + '_' + NL_PID + '.json';
       await Neutralino.filesystem.writeFile(msgFile, JSON.stringify({ args: NL_ARGS }));
-      await Neutralino.app.exit();
+      await Neutralino.app.exit(0);
     }
   } catch(err) {
     console.error('IPC init error:', err);
