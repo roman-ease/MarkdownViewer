@@ -1353,15 +1353,16 @@ async function initIPC() {
         isIpcPolling = true;
 
         try {
-          const folderEntries = await Neutralino.filesystem.readDirectory(state.ipcDir);
+          // ipcDir (ローカル変数) を使用
+          const folderEntries = await Neutralino.filesystem.readDirectory(ipcDir);
           for (const entry of folderEntries) {
             // メッセージファイルのみを対象にする
             if (entry.type === 'FILE' && entry.entry.startsWith('msg_')) {
-              const msgPath = state.ipcDir + '\\' + entry.entry;
+              const msgPath = ipcDir + '\\' + entry.entry;
               
               try {
                 const content = await Neutralino.filesystem.readFile(msgPath);
-                // 読み込めたら、再処理されないように直ちに削除を試みる
+                // 読み込めたら、再処理されないように直ちに削除
                 await Neutralino.filesystem.removeFile(msgPath);
                 
                 const data = JSON.parse(content);
@@ -1377,15 +1378,14 @@ async function initIPC() {
                   await Neutralino.window.focus();
                 }
               } catch (e) {
-                // readFile や removeFile が失敗した場合は既に他で処理されたと判断
+                // readFile や removeFile が失敗した場合は無視
               }
             }
           }
         } catch (err) {
-          // console.warn('IPC Poll error:', err);
+          // ディレクトリ読み込みエラー等
         } finally {
           isIpcPolling = false;
-          // 次回のポーリングをスケジュール
           if (!state.isIpcClosed) {
             setTimeout(pollIpc, 800);
           }
@@ -1393,7 +1393,7 @@ async function initIPC() {
       };
 
       // 最初のポーリングを開始
-      setTimeout(pollIpc, 800);
+      setTimeout(pollIpc, 200);
       
     } else {
       // セカンダリ：引数送信して終了
