@@ -1346,32 +1346,54 @@ async function initIPC() {
         }
       } catch(e) {}
 
-      state.ipcPollingInterval = setInterval(async () => {
+      // ポーリング用関数の定義（重複動作を防ぐため、setTimeout を再帰的に呼び出す）
+      let isIpcPolling = false;
+      const pollIpc = async () => {
+        if (state.isIpcClosed || isIpcPolling) return;
+        isIpcPolling = true;
+
         try {
-          const entries = await Neutralino.filesystem.readDirectory(ipcDir);
-          for (const entry of entries) {
-            if (entry.entry.startsWith('msg_')) {
-              const msgPath = ipcDir + '\\' + entry.entry;
-              const content = await Neutralino.filesystem.readFile(msgPath);
-              const data = JSON.parse(content);
+          const folderEntries = await Neutralino.filesystem.readDirectory(state.ipcDir);
+          for (const entry of folderEntries) {
+            // メッセージファイルのみを対象にする
+            if (entry.type === 'FILE' && entry.entry.startsWith('msg_')) {
+              const msgPath = state.ipcDir + '\\' + entry.entry;
               
-              if (data && data.args) {
-                // 有効なファイルパスのみを抽出して開く
-                for (let i = 1; i < data.args.length; i++) {
-                  const arg = data.args[i];
-                  if (arg && !arg.startsWith('--')) {
-                    await loadFile(arg);
+              try {
+                const content = await Neutralino.filesystem.readFile(msgPath);
+                // 読み込めたら、再処理されないように直ちに削除を試みる
+                await Neutralino.filesystem.removeFile(msgPath);
+                
+                const data = JSON.parse(content);
+                if (data && data.args) {
+                  for (let i = 1; i < data.args.length; i++) {
+                    const arg = data.args[i];
+                    if (arg && !arg.startsWith('--')) {
+                      await loadFile(arg);
+                    }
                   }
+                  // ウィンドウを前面に出す
+                  await Neutralino.window.show();
+                  await Neutralino.window.focus();
                 }
-                // フォーカスを奪う
-                await Neutralino.window.show();
-                await Neutralino.window.focus();
+              } catch (e) {
+                // readFile や removeFile が失敗した場合は既に他で処理されたと判断
               }
-              await Neutralino.filesystem.removeFile(msgPath);
             }
           }
-        } catch(err) {}
-      }, 800);
+        } catch (err) {
+          // console.warn('IPC Poll error:', err);
+        } finally {
+          isIpcPolling = false;
+          // 次回のポーリングをスケジュール
+          if (!state.isIpcClosed) {
+            setTimeout(pollIpc, 800);
+          }
+        }
+      };
+
+      // 最初のポーリングを開始
+      setTimeout(pollIpc, 800);
       
     } else {
       // セカンダリ：引数送信して終了
