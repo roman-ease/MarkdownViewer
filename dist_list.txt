@@ -1,0 +1,40 @@
+
+    Directory: C:\Dev\20260313_MerkdownViewer\dist
+
+Mode       LastWriteTime
+----       -------------
+d----   2026/03/19    10
+                     :39
+
+    Directory: C:\Dev\20260313_MerkdownViewer\dist\MarkdownViewer
+
+Mode       LastWriteTime
+----       -------------
+d----   2026/03/18    20
+                     :03
+-a---   2026/03/13    12
+                     :11
+-a---   2026/03/13    12
+                     :11
+-a---   2026/03/13    12
+                     :11
+-a---   2026/03/13    12
+                     :11
+-a---   2026/03/13    12
+                     :11
+-a---   2026/03/13    12
+                     :11
+-a---   2026/03/18    22
+                     :03
+-a---   2026/03/19    10
+                     :36
+-a---   2026/03/19    10
+                     :39
+
+    Directory: C:\Dev\20260313_MerkdownViewer\dist\MarkdownViewer\.tmp
+
+Mode       LastWriteTime
+----       -------------
+-a---   2026/03/19    10
+                     :36
+

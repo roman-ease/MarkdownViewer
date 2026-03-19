@@ -48,7 +48,7 @@
 }
 
 /* --- ライトテーマ --- */
-body[data-theme="light"] {
+:root[data-theme="light"] {
   --bg-primary: #ffffff;
   --bg-secondary: #f6f8fa;
   --bg-tertiary: #eff2f5;
@@ -64,7 +64,7 @@ body[data-theme="light"] {
 }
 
 /* --- セピアテーマ --- */
-body[data-theme="sepia"] {
+:root[data-theme="sepia"] {
   --bg-primary: #f4ecd8;
   --bg-secondary: #efe8d1;
   --bg-tertiary: #e5ddc5;
@@ -80,7 +80,7 @@ body[data-theme="sepia"] {
 }
 
 body {
-  transition: background-color var(--transition-normal), color var(--transition-normal);
+  transition: background-color var(--transition-normal), color var(--transition-normal), border-color var(--transition-normal);
 }
 
 /* --- リセット --- */

@@ -87,7 +87,6 @@ function setupEventListeners() {
   $('btn-save').addEventListener('click', saveFile);
   $('btn-save-as').addEventListener('click', saveFileAs);
   $('btn-toggle-view').addEventListener('click', toggleViewMode);
-  $('btn-table').addEventListener('click', () => insertTable(3, 2)); // デフォルト 3行2列
 
   const btnExportMenu = $('btn-export-menu');
   const exportDropdown = $('export-dropdown');
@@ -189,6 +188,17 @@ function insertAtCursor(text) {
  * テーブル雛形を挿入
  */
 function insertTable(rows, cols) {
+  if (rows === undefined || cols === undefined) {
+    const input = prompt('テーブルのサイズを入力してください (例: 3x2)', '3x2');
+    if (!input) return;
+    const parts = input.toLowerCase().split('x');
+    if (parts.length !== 2) return;
+    rows = parseInt(parts[0]);
+    cols = parseInt(parts[1]);
+  }
+
+  if (isNaN(rows) || isNaN(cols) || rows < 1 || cols < 1) return;
+
   let table = '\n';
   // ヘッダー
   table += '| ' + Array(cols).fill('Header').join(' | ') + ' |\n';

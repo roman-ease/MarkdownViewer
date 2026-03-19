@@ -1,0 +1,12 @@
+C:\Dev\20260313_MerkdownViewer\dist\MarkdownViewer
+C:\Dev\20260313_MerkdownViewer\dist\MarkdownViewer\.tmp
+C:\Dev\20260313_MerkdownViewer\dist\MarkdownViewer\MarkdownViewer-linux_arm64
+C:\Dev\20260313_MerkdownViewer\dist\MarkdownViewer\MarkdownViewer-linux_armhf
+C:\Dev\20260313_MerkdownViewer\dist\MarkdownViewer\MarkdownViewer-linux_x64
+C:\Dev\20260313_MerkdownViewer\dist\MarkdownViewer\MarkdownViewer-mac_arm64
+C:\Dev\20260313_MerkdownViewer\dist\MarkdownViewer\MarkdownViewer-mac_universal
+C:\Dev\20260313_MerkdownViewer\dist\MarkdownViewer\MarkdownViewer-mac_x64
+C:\Dev\20260313_MerkdownViewer\dist\MarkdownViewer\MarkdownViewer-win_x64.exe
+C:\Dev\20260313_MerkdownViewer\dist\MarkdownViewer\neutralinojs.log
+C:\Dev\20260313_MerkdownViewer\dist\MarkdownViewer\resources.neu
+C:\Dev\20260313_MerkdownViewer\dist\MarkdownViewer\.tmp\window_state.config.json

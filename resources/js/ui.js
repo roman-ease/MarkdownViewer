@@ -123,6 +123,12 @@ function escapeHtml(text) {
   return div.innerHTML;
 }
 
+function setTheme(name) {
+  state.theme = name;
+  document.documentElement.setAttribute('data-theme', name);
+  localStorage.setItem('markdown-theme', name);
+}
+
 /**
  * 簡易パス解決（相対パスを絶対パスへ）
  */

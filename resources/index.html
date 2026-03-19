@@ -97,17 +97,24 @@
           </ul>
         </div>
       </div>
-      <div class="toolbar-divider"></div>
-      <button class="toolbar-btn" id="btn-table" title="テーブル挿入">
-        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
-          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-          <line x1="3" y1="9" x2="21" y2="9"></line>
-          <line x1="3" y1="15" x2="21" y2="15"></line>
-          <line x1="9" y1="3" x2="9" y2="21"></line>
-          <line x1="15" y1="3" x2="15" y2="21"></line>
-        </svg>
-        <span>テーブル</span>
-      </button>
+      <div class="dropdown-container">
+        <button class="toolbar-btn" id="btn-tools-menu" title="ツール">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="16 18 22 12 16 6"></polyline>
+            <polyline points="8 6 2 12 8 18"></polyline>
+          </svg>
+          <span>ツール</span>
+          <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" style="margin-left:-2px; opacity:0.7">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </button>
+        <div class="dropdown-menu" id="tools-dropdown" style="display:none;">
+          <div class="dropdown-title">編集支援</div>
+          <ul class="recent-list">
+            <li id="menu-insert-table">テーブル挿入...</li>
+          </ul>
+        </div>
+      </div>
     </div>
     <div class="toolbar-center">
       <span class="file-title" id="file-title">無題</span>
