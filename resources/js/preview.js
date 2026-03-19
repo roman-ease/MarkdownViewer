@@ -14,7 +14,9 @@ async function updatePreview() {
       // 見出しにIDを付与するためのカスタムレンダラー
       const renderer = new marked.Renderer();
       renderer.heading = (text, level) => {
-        const id = text.toLowerCase()
+        // text が文字列でない場合への対策と、内部のHTMLタグ（太字等）の除去
+        const plainText = String(text).replace(/<[^>]*>/g, '');
+        const id = plainText.toLowerCase()
           .replace(/[^\w\s-]/g, '')
           .replace(/\s+/g, '-')
           .replace(/-+/g, '-');
