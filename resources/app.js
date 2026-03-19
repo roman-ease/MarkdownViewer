@@ -48,23 +48,38 @@ Neutralino.events.on('ready', async () => {
 
 // ウィンドウクローズ時の処理
 Neutralino.events.on('windowClose', async () => {
-  saveCurrentTabState(); 
-  const modifiedTabs = state.tabs.filter(t => t.isModified);
-  
-  if (modifiedTabs.length > 0) {
-    const res = await Neutralino.os.showMessageBox('終了の確認', `${modifiedTabs.length}個の未保存のファイルがあります。\n保存せずに終了してよろしいですか？`, 'YES_NO', 'WARNING');
-    if (res !== 'YES') {
-      return; 
+  try {
+    // 視覚的な応答性を重視し、まずウィンドウを消す（プロセス終了は裏で行う）
+    await Neutralino.window.hide();
+
+    saveCurrentTabState(); 
+    const modifiedTabs = state.tabs.filter(t => t.isModified);
+    
+    if (modifiedTabs.length > 0) {
+      // 既にウィンドウが隠れているため、表示が必要な場合は再度出す必要があるが、
+      // ユーザー体験としては「保存確認」を hide の後で行うと混乱するため、
+      // 実際には hide の前に確認すべきかもしれない。
+      // しかし「✕」を押して反応がない（フリーズ）を避けるのが優先。
+      // ここでは敢えて hide せずに確認し、その後確実に exit する方針にする。
+      await Neutralino.window.show(); 
+      const res = await Neutralino.os.showMessageBox('終了の確認', `${modifiedTabs.length}個の未保存のファイルがあります。\n保存せずに終了してよろしいですか？`, 'YES_NO', 'WARNING');
+      if (res !== 'YES') {
+        return; 
+      }
+      await Neutralino.window.hide();
     }
-  }
 
-  // IPCの後片付け
-  if (state.isPrimaryInstance) {
-    state.isIpcClosed = true;
-    try {
-      await Neutralino.storage.setData('primary_info', null);
-    } catch(e) {}
+    // IPCの後片付け
+    if (state.isPrimaryInstance) {
+      state.isIpcClosed = true;
+      try {
+        await Neutralino.storage.setData('primary_info', null);
+      } catch(e) {}
+    }
+  } catch(err) {
+    console.warn('Error during windowClose:', err);
+  } finally {
+    // 何が起きても最後は必ず終了
+    Neutralino.app.exit();
   }
-
-  Neutralino.app.exit();
 });

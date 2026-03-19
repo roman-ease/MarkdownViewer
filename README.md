@@ -2,7 +2,7 @@
 
 [![Neutralinojs](https://img.shields.io/badge/Framework-Neutralinojs-blue.svg)](https://neutralino.js.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/Version-1.5.2-green.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/Version-1.5.3-green.svg)](CHANGELOG.md)
 
 Windows向けの軽量・高速なMarkdownビューア兼エディタです。
 [Neutralinojs](https://neutralino.js.org/)を採用し、システム標準のWebView2を利用することで、配布サイズを非常にコンパクト（約2.3MB）に抑えています。

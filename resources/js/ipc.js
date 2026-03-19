@@ -29,7 +29,11 @@ async function initIPC() {
 
     if (state.isPrimaryInstance) {
       // --- プライマリ：メッセージの受信待機 ---
-      await Neutralino.storage.setData('primary_info', JSON.stringify({ pid: NL_PID, timestamp: Date.now() }));
+      try {
+        await Neutralino.storage.setData('primary_info', JSON.stringify({ pid: NL_PID, timestamp: Date.now() }));
+      } catch(e) {
+        console.warn('IPC: Failed to set primary info (Storage may be read-only)');
+      }
       
       try {
         const lastMsgData = await Neutralino.storage.getData('ipc_message');
@@ -68,34 +72,43 @@ async function initIPC() {
 
     } else {
       // --- セカンダリ：引数をプライマリに転送して終了 ---
-      let cwd = NL_CWD;
       try {
-        cwd = await Neutralino.os.getEnv('PWD') || await Neutralino.os.getEnv('CD') || NL_CWD;
-      } catch(e) {}
+        let cwd = NL_CWD;
+        try {
+          cwd = await Neutralino.os.getEnv('PWD') || await Neutralino.os.getEnv('CD') || NL_CWD;
+        } catch(e) {}
 
-      const fileArgs = [];
-      for (const arg of NL_ARGS) {
-        if (!arg || arg.startsWith('--')) continue;
-        const lowArg = arg.toLowerCase();
-        if (lowArg.endsWith('.exe') || lowArg.includes('markdownviewer') || lowArg.includes('neu')) continue;
-        
-        let fullPath = arg;
-        if (!(/^[a-zA-Z]:\\/.test(fullPath) || fullPath.startsWith('/') || fullPath.startsWith('\\\\'))) {
-          fullPath = cwd.replace(/[\\/]+$/, '') + '\\' + fullPath;
+        const fileArgs = [];
+        for (const arg of NL_ARGS) {
+          if (!arg || arg.startsWith('--')) continue;
+          const lowArg = arg.toLowerCase();
+          if (lowArg.endsWith('.exe') || lowArg.includes('markdownviewer') || lowArg.includes('neu')) continue;
+          
+          let fullPath = arg;
+          if (!(/^[a-zA-Z]:\\/.test(fullPath) || fullPath.startsWith('/') || fullPath.startsWith('\\\\'))) {
+            fullPath = cwd.replace(/[\\/]+$/, '') + '\\' + fullPath;
+          }
+          fileArgs.push(fullPath);
         }
-        fileArgs.push(fullPath);
-      }
 
-      if (fileArgs.length > 0) {
-        await Neutralino.storage.setData('ipc_message', JSON.stringify({
-          args: fileArgs,
-          timestamp: Date.now(),
-          senderPid: NL_PID
-        }));
-        await new Promise(r => setTimeout(r, 220));
+        if (fileArgs.length > 0) {
+          try {
+            await Neutralino.storage.setData('ipc_message', JSON.stringify({
+              args: fileArgs,
+              timestamp: Date.now(),
+              senderPid: NL_PID
+            }));
+            await new Promise(r => setTimeout(r, 220));
+          } catch(e) {
+            console.error('IPC: Failed to send message to primary');
+          }
+        }
+      } catch(err) {
+        console.error('IPC: Error in secondary instance:', err);
+      } finally {
+        // 何があってもセカンダリは終了させる
+        await Neutralino.app.exit(0);
       }
-      
-      await Neutralino.app.exit(0);
     }
   } catch(err) {
     state.isPrimaryInstance = true;
