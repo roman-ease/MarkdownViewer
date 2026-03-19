@@ -11,8 +11,8 @@ async function updatePreview() {
   
   try {
     if (typeof marked !== 'undefined' && typeof marked.parse === 'function') {
-      // 見出しにIDを付与するための設定
-      const options = {
+      // 見出しにIDを付与するための設定をマージ (marked.use を使用して既存メソッドを壊さないようにする)
+      marked.use({
         renderer: {
           heading(text, level) {
             // text が文字列でない場合への対策と、内部のHTMLタグ（太字等）の除去
@@ -24,9 +24,9 @@ async function updatePreview() {
             return `<h${level} id="${id}">${text}</h${level}>`;
           }
         }
-      };
+      });
 
-      const dirtyHtml = marked.parse(text, options);
+      const dirtyHtml = marked.parse(text);
       // XSS対策: DOMPurifyでサニタイズ (id属性を許可)
       const html = DOMPurify.sanitize(dirtyHtml, { ADD_ATTR: ['id'] });
       preview.innerHTML = html;
