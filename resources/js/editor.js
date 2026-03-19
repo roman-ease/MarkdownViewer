@@ -110,13 +110,42 @@ function setupEventListeners() {
     e.stopPropagation();
     recentMenu.style.display = recentMenu.style.display === 'none' ? 'block' : 'none';
     exportDropdown.style.display = 'none';
+    if (toolsDropdown) toolsDropdown.style.display = 'none';
   });
+
+  const btnToolsMenu = $('btn-tools-menu');
+  const toolsDropdown = $('tools-dropdown');
+  if (btnToolsMenu) {
+    btnToolsMenu.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toolsDropdown.style.display = toolsDropdown.style.display === 'none' ? 'block' : 'none';
+      recentMenu.style.display = 'none';
+      exportDropdown.style.display = 'none';
+    });
+  }
+
+  $('menu-insert-table').addEventListener('click', () => {
+    if (toolsDropdown) toolsDropdown.style.display = 'none';
+    insertTable();
+  });
+
   document.addEventListener('click', () => {
     recentMenu.style.display = 'none';
     exportDropdown.style.display = 'none';
+    if (toolsDropdown) toolsDropdown.style.display = 'none';
   });
+
   recentMenu.addEventListener('click', (e) => e.stopPropagation());
   exportDropdown.addEventListener('click', (e) => e.stopPropagation());
+  if (toolsDropdown) toolsDropdown.addEventListener('click', (e) => e.stopPropagation());
+
+  // テーマ切替
+  $('theme-dark').addEventListener('click', () => setTheme('dark'));
+  $('theme-light').addEventListener('click', () => setTheme('light'));
+  $('theme-sepia').addEventListener('click', () => setTheme('sepia'));
+
+  // 同期スクロール
+  $('btn-sync-scroll').addEventListener('click', toggleSyncScroll);
 
   $('btn-reload').addEventListener('click', reloadFile);
   $('btn-dismiss-notification').addEventListener('click', dismissNotification);

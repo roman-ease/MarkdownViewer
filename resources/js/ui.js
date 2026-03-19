@@ -123,15 +123,45 @@ function escapeHtml(text) {
   return div.innerHTML;
 }
 
+/**
+ * デザインテーマを設定
+ */
 function setTheme(name) {
   state.theme = name;
   document.documentElement.setAttribute('data-theme', name);
   localStorage.setItem('markdown-theme', name);
+  
+  // アクティブなメニュー項目の強調表示
+  document.querySelectorAll('.theme-item').forEach(el => {
+    el.style.fontWeight = el.id === `theme-${name}` ? 'bold' : 'normal';
+    el.style.color = el.id === `theme-${name}` ? 'var(--accent)' : 'var(--text-secondary)';
+  });
 }
 
 /**
- * 簡易パス解決（相対パスを絶対パスへ）
+ * 同期スクロールの有効/無効を切替
  */
+function toggleSyncScroll() {
+  state.isSyncScroll = !state.isSyncScroll;
+  localStorage.setItem('markdown-sync-scroll', state.isSyncScroll);
+  updateSyncScrollUI();
+}
+
+/**
+ * 同期スクロールUIの更新
+ */
+function updateSyncScrollUI() {
+  const btn = $('btn-sync-scroll');
+  const label = $('sync-scroll-label');
+  if (!btn || !label) return;
+  if (state.isSyncScroll) {
+    btn.classList.add('active');
+    label.textContent = '同期ON';
+  } else {
+    btn.classList.remove('active');
+    label.textContent = '同期OFF';
+  }
+}
 function resolvePath(baseDir, relativePath) {
   const isWin = baseDir.includes('\\');
   const sep = isWin ? '\\' : '/';
