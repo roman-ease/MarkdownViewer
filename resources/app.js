@@ -6,6 +6,12 @@
 
 Neutralino.init();
 
+// 起動時の診断ログ (v1.5.4)
+if (typeof NL_CWD !== 'undefined') {
+  console.log(`[v1.5.4] CWD: ${NL_CWD}`);
+  console.log(`[v1.5.4] ARGS: ${JSON.stringify(NL_ARGS)}`);
+}
+
 /**
  * アプリの初期化処理
  * Neutralinojs の ready イベント後に実行
@@ -49,6 +55,11 @@ Neutralino.events.on('ready', async () => {
 // ウィンドウクローズ時の処理
 Neutralino.events.on('windowClose', async () => {
   try {
+    // 監視を即座に停止してプロセスへの干渉を防ぐ (v1.5.4)
+    if (typeof stopWatchingFile === 'function') {
+      try { stopWatchingFile(); } catch(e) {}
+    }
+
     // 視覚的な応答性を重視し、まずウィンドウを消す（プロセス終了は裏で行う）
     await Neutralino.window.hide();
 
@@ -56,14 +67,14 @@ Neutralino.events.on('windowClose', async () => {
     const modifiedTabs = state.tabs.filter(t => t.isModified);
     
     if (modifiedTabs.length > 0) {
-      // 既にウィンドウが隠れているため、表示が必要な場合は再度出す必要があるが、
-      // ユーザー体験としては「保存確認」を hide の後で行うと混乱するため、
-      // 実際には hide の前に確認すべきかもしれない。
-      // しかし「✕」を押して反応がない（フリーズ）を避けるのが優先。
-      // ここでは敢えて hide せずに確認し、その後確実に exit する方針にする。
+      // 既にウィンドウが隠れているため、表示が必要な場合は再度出す
       await Neutralino.window.show(); 
       const res = await Neutralino.os.showMessageBox('終了の確認', `${modifiedTabs.length}個の未保存のファイルがあります。\n保存せずに終了してよろしいですか？`, 'YES_NO', 'WARNING');
       if (res !== 'YES') {
+        // キャンセルの場合は監視を再開
+        if (typeof startWatchingFile === 'function' && state.currentFilePath) {
+          try { startWatchingFile(); } catch(e) {}
+        }
         return; 
       }
       await Neutralino.window.hide();
@@ -77,7 +88,7 @@ Neutralino.events.on('windowClose', async () => {
       } catch(e) {}
     }
   } catch(err) {
-    console.warn('Error during windowClose:', err);
+    console.warn('[v1.5.4] Error during windowClose:', err);
   } finally {
     // 何が起きても最後は必ず終了
     Neutralino.app.exit();
