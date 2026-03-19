@@ -11,19 +11,22 @@ async function updatePreview() {
   
   try {
     if (typeof marked !== 'undefined' && typeof marked.parse === 'function') {
-      // 見出しにIDを付与するためのカスタムレンダラー
-      const renderer = new marked.Renderer();
-      renderer.heading = (text, level) => {
-        // text が文字列でない場合への対策と、内部のHTMLタグ（太字等）の除去
-        const plainText = String(text).replace(/<[^>]*>/g, '');
-        const id = plainText.toLowerCase()
-          .replace(/[^\w\s-]/g, '')
-          .replace(/\s+/g, '-')
-          .replace(/-+/g, '-');
-        return `<h${level} id="${id}">${text}</h${level}>`;
+      // 見出しにIDを付与するための設定
+      const options = {
+        renderer: {
+          heading(text, level) {
+            // text が文字列でない場合への対策と、内部のHTMLタグ（太字等）の除去
+            const plainText = String(text).replace(/<[^>]*>/g, '');
+            const id = plainText.toLowerCase()
+              .replace(/[^\w\s-]/g, '')
+              .replace(/\s+/g, '-')
+              .replace(/-+/g, '-');
+            return `<h${level} id="${id}">${text}</h${level}>`;
+          }
+        }
       };
 
-      const dirtyHtml = marked.parse(text, { renderer });
+      const dirtyHtml = marked.parse(text, options);
       // XSS対策: DOMPurifyでサニタイズ (id属性を許可)
       const html = DOMPurify.sanitize(dirtyHtml, { ADD_ATTR: ['id'] });
       preview.innerHTML = html;
