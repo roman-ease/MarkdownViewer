@@ -363,6 +363,21 @@ html, body {
   color: var(--text-primary);
 }
 
+.tab.version-tab {
+  min-width: 80px;
+  background: var(--bg-tertiary);
+  color: var(--accent);
+  border-left: 1px solid var(--border);
+  margin-left: auto; /* 右端に寄せる */
+  justify-content: center;
+  font-weight: 600;
+}
+
+.tab.version-tab.active {
+  background: var(--bg-primary);
+  border-top-color: var(--accent);
+}
+
 @keyframes pulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.4; }

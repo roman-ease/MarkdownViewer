@@ -2,7 +2,7 @@
 
 [![Neutralinojs](https://img.shields.io/badge/Framework-Neutralinojs-blue.svg)](https://neutralino.js.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/Version-1.5.5-green.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/Version-1.6.0-green.svg)](CHANGELOG.md)
 
 Windows向けの軽量・高速なMarkdownビューア兼エディタです。
 [Neutralinojs](https://neutralino.js.org/)を採用し、システム標準のWebView2を利用することで、配布サイズを非常にコンパクト（約2.3MB）に抑えています。
@@ -37,6 +37,7 @@ Windows向けの軽量・高速なMarkdownビューア兼エディタです。
 - **Styling**: Vanilla CSS (Modern UI)
 
 ## 📜 更新履歴（ダイジェスト）
+- **v1.6.0** : 新機能追加。目次(TOC)自動生成、およびバージョン情報表示エリアを実装。
 - **v1.5.5** : セキュリティ強化。Native API の権限を最小化（Least Privilege）し、堅牢性を向上。
 - **v1.5.4** : 関連付け起動（ダブルクリック）時の終了処理の不具合を修正。
 - **v1.5.3** : 終了処理の例外保護と IPC 通信（タブ追加）の安定性を向上。

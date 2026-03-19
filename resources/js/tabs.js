@@ -144,4 +144,33 @@ function renderTabs() {
     
     tabBar.appendChild(tabEl);
   });
+
+  // バージョンタブを追加（固定）
+  const versionTab = document.createElement('div');
+  versionTab.className = 'tab version-tab';
+  versionTab.innerHTML = `<span class="tab-title">バージョン</span>`;
+  versionTab.addEventListener('click', () => {
+    showVersionInfo();
+  });
+  tabBar.appendChild(versionTab);
+}
+
+/**
+ * バージョン情報を表示する（専用タブの動作）
+ */
+async function showVersionInfo() {
+  let version = '1.6.0';
+  try {
+    const config = await Neutralino.app.getConfig();
+    version = config.version;
+  } catch (err) {
+    console.warn('Failed to get version from config:', err);
+  }
+
+  Neutralino.os.showMessageBox(
+    'バージョン情報',
+    `Markdown Viewer v${version}\n\nFramework: Neutralinojs v6.5.0\nParser: marked.js\n\n© 2026 roman-ease`,
+    'OK',
+    'INFO'
+  );
 }

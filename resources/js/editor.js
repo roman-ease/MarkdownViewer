@@ -129,6 +129,11 @@ function setupEventListeners() {
     insertTable();
   });
 
+  $('menu-insert-toc').addEventListener('click', () => {
+    if (toolsDropdown) toolsDropdown.style.display = 'none';
+    insertTOC();
+  });
+
   document.addEventListener('click', () => {
     recentMenu.style.display = 'none';
     exportDropdown.style.display = 'none';
@@ -239,4 +244,46 @@ function insertTable(rows, cols) {
   }
   insertAtCursor(table);
   editor.focus();
+}
+
+/**
+ * 目次を生成して挿入
+ */
+function insertTOC() {
+  const text = editor.value;
+  const lines = text.split('\n');
+  const headings = [];
+  
+  // 正規表現で見出しを抽出 (# 見出し)
+  const headingRegex = /^(#{1,6})\s+(.+)$/;
+  
+  lines.forEach(line => {
+    const match = line.match(headingRegex);
+    if (match) {
+      const level = match[1].length;
+      const title = match[2].trim();
+      // アンカー生成 (小文字化、記号をハイフンに、連続ハイフン抑制)
+      const anchor = title.toLowerCase()
+        .replace(/[^\w\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-');
+      headings.push({ level, title, anchor });
+    }
+  });
+
+  if (headings.length === 0) {
+    Neutralino.os.showMessageBox('情報', '見出しが見つかりませんでした。', 'OK', 'INFO');
+    return;
+  }
+
+  let toc = '\n## 目次\n\n';
+  const minLevel = Math.min(...headings.map(h => h.level));
+  
+  headings.forEach(h => {
+    const indent = '  '.repeat(h.level - minLevel);
+    toc += `${indent}- [${h.title}](#${h.anchor})\n`;
+  });
+  toc += '\n';
+
+  insertAtCursor(toc);
 }
