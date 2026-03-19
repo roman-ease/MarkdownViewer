@@ -10,6 +10,9 @@ const state = {
   lastModifiedTime: null,  
   watchInterval: null,     
   recentFiles: [],         
+  isSyncScroll: true,   // 同期スクロール有効
+  theme: 'dark',        // 'dark' | 'light' | 'sepia'
+  scrollSource: null,   // 'editor' | 'preview' (無限ループ防止用)
   
   // タブ管理
   tabs: [],                // { id, filePath, content, originalContent, isModified, lastModifiedTime, scrollTop }

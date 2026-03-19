@@ -47,6 +47,42 @@
   --transition-normal: 200ms ease;
 }
 
+/* --- ライトテーマ --- */
+body[data-theme="light"] {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f6f8fa;
+  --bg-tertiary: #eff2f5;
+  --bg-elevated: #ffffff;
+  --text-primary: #24292f;
+  --text-secondary: #57606a;
+  --text-muted: #8c959f;
+  --accent: #0969da;
+  --accent-hover: #0550ae;
+  --accent-subtle: rgba(9, 105, 218, 0.1);
+  --border: #d0d7de;
+  --border-hover: #afb8c1;
+}
+
+/* --- セピアテーマ --- */
+body[data-theme="sepia"] {
+  --bg-primary: #f4ecd8;
+  --bg-secondary: #efe8d1;
+  --bg-tertiary: #e5ddc5;
+  --bg-elevated: #f4ecd8;
+  --text-primary: #5b4636;
+  --text-secondary: #7a614e;
+  --text-muted: #9c8470;
+  --accent: #8b572a;
+  --accent-hover: #724722;
+  --accent-subtle: rgba(139, 87, 42, 0.1);
+  --border: #dcd3b6;
+  --border-hover: #c9bf9f;
+}
+
+body {
+  transition: background-color var(--transition-normal), color var(--transition-normal);
+}
+
 /* --- リセット --- */
 *, *::before, *::after {
   box-sizing: border-box;

@@ -30,18 +30,56 @@ function setupEventListeners() {
   });
 
   editor.addEventListener('paste', async (e) => {
-    if (!e.clipboardData || !e.clipboardData.items) return;
-    
-    for (const item of e.clipboardData.items) {
-      if (item.type.indexOf('image') !== -1) {
-        e.preventDefault();
-        const file = item.getAsFile();
-        if (file) {
-          await insertPastedImage(file);
+    if (!e.clipboardData) return;
+
+    // Excel/TSVテーブル判定
+    const text = e.clipboardData.getData('text/plain');
+    if (text && text.includes('\t') && text.trim().includes('\n')) {
+      e.preventDefault();
+      const rows = text.trim().split(/\r?\n/).map(row => row.split('\t'));
+      let markdownTable = '\n';
+      rows.forEach((cols, i) => {
+        markdownTable += '| ' + cols.join(' | ') + ' |\n';
+        if (i === 0) {
+          markdownTable += '| ' + cols.map(() => '---').join(' | ') + ' |\n';
         }
-        break;
+      });
+      insertAtCursor(markdownTable);
+      return;
+    }
+
+    // 画像貼り付け判定
+    const items = e.clipboardData.items;
+    if (items) {
+      for (const item of items) {
+        if (item.type.indexOf('image') !== -1) {
+          e.preventDefault();
+          const file = item.getAsFile();
+          if (file) {
+            await insertPastedImage(file);
+          }
+          return;
+        }
       }
     }
+  });
+
+  // 同期スクロールイベント
+  editor.addEventListener('scroll', () => {
+    if (!state.isSyncScroll || state.scrollSource === 'preview') return;
+    state.scrollSource = 'editor';
+    const previewEl = $('preview');
+    const scrollPercentage = editor.scrollTop / (editor.scrollHeight - editor.clientHeight);
+    previewEl.scrollTop = scrollPercentage * (previewEl.scrollHeight - previewEl.clientHeight);
+    setTimeout(() => { state.scrollSource = null; }, 50);
+  });
+
+  preview.addEventListener('scroll', () => {
+    if (!state.isSyncScroll || state.scrollSource === 'editor') return;
+    state.scrollSource = 'preview';
+    const scrollPercentage = preview.scrollTop / (preview.scrollHeight - preview.clientHeight);
+    editor.scrollTop = scrollPercentage * (editor.scrollHeight - editor.clientHeight);
+    setTimeout(() => { state.scrollSource = null; }, 50);
   });
 
   $('btn-new').addEventListener('click', newFile);
@@ -49,6 +87,7 @@ function setupEventListeners() {
   $('btn-save').addEventListener('click', saveFile);
   $('btn-save-as').addEventListener('click', saveFileAs);
   $('btn-toggle-view').addEventListener('click', toggleViewMode);
+  $('btn-table').addEventListener('click', () => insertTable(3, 2)); // デフォルト 3行2列
 
   const btnExportMenu = $('btn-export-menu');
   const exportDropdown = $('export-dropdown');
@@ -132,4 +171,33 @@ function toggleViewMode() {
     label.textContent = 'ビューのみ';
     editor.focus();
   }
+}
+
+/**
+ * カーソル位置にテキストを挿入
+ */
+function insertAtCursor(text) {
+  const start = editor.selectionStart;
+  const end = editor.selectionEnd;
+  const val = editor.value;
+  editor.value = val.substring(0, start) + text + val.substring(end);
+  editor.selectionStart = editor.selectionEnd = start + text.length;
+  editor.dispatchEvent(new Event('input'));
+}
+
+/**
+ * テーブル雛形を挿入
+ */
+function insertTable(rows, cols) {
+  let table = '\n';
+  // ヘッダー
+  table += '| ' + Array(cols).fill('Header').join(' | ') + ' |\n';
+  // セパレーター
+  table += '| ' + Array(cols).fill('---').join(' | ') + ' |\n';
+  // データ行
+  for (let i = 0; i < rows; i++) {
+    table += '| ' + Array(cols).fill(' ').join(' | ') + ' |\n';
+  }
+  insertAtCursor(table);
+  editor.focus();
 }
