@@ -159,7 +159,7 @@ function renderTabs() {
  * バージョン情報を表示する（専用タブの動作）
  */
 async function showVersionInfo() {
-  let version = '1.6.4';
+  let version = '1.6.8';
   try {
     const config = await Neutralino.app.getConfig();
     version = config.version;

@@ -262,11 +262,12 @@ function insertTOC() {
     if (match) {
       const level = match[1].length;
       const title = match[2].trim();
-      // アンカー生成 (小文字化、記号をハイフンに、連続ハイフン抑制)
+      // アンカー生成 (v1.6.6 Unicode/日本語対応: app.js と同一ロジック)
       const anchor = title.toLowerCase()
-        .replace(/[^\w\s-]/g, '')
-        .replace(/\s+/g, '-')
-        .replace(/-+/g, '-');
+        .trim()
+        .replace(/[\s\t\n\r\f\v\u3000]/g, '-') // 空白(全角含む)をハイフンに
+        .replace(/[!"#$%&'()*+,./:;<=>?@\[\\\]^`{|}~]/g, '') // 指定記号を削除
+        .replace(/-+/g, '-'); // 連続ハイフンを1つに
       headings.push({ level, title, anchor });
     }
   });

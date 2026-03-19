@@ -765,14 +765,17 @@ body.drag-over::after {
 
 /* --- 印刷/PDFエクスポート用 --- */
 @media print {
-  /* 印刷時は背景をリセットして白紙にする */
-  body {
+  /* 印刷時は高さ制限とスクロール禁止を解除 */
+  html, body {
+    height: auto !important;
+    overflow: visible !important;
     background: #fff;
     color: #000;
   }
   
   /* UI要素を非表示にする */
   #toolbar, 
+  #tab-bar, 
   #statusbar, 
   #resizer, 
   #editor-pane, 
@@ -786,6 +789,8 @@ body.drag-over::after {
     height: auto !important;
     overflow: visible !important;
     display: block !important;
+    margin: 0 !important;
+    padding: 0 !important;
   }
   
   #preview-pane {
@@ -793,6 +798,15 @@ body.drag-over::after {
     flex: none !important;
     overflow: visible !important;
     background: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* プレビューコンテナの高さ制限も解除 */
+  #preview {
+    height: auto !important;
+    overflow: visible !important;
+    padding: 0 !important;
   }
   
   /* Markdown表示領域の印刷最適化 */

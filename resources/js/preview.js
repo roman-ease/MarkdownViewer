@@ -11,22 +11,7 @@ async function updatePreview() {
   
   try {
     if (typeof marked !== 'undefined' && typeof marked.parse === 'function') {
-      // 見出しにIDを付与するための設定をマージ (marked.use を使用して既存メソッドを壊さないようにする)
-      marked.use({
-        renderer: {
-          heading(text, level) {
-            // text が文字列でない場合への対策と、内部のHTMLタグ（太字等）の除去
-            const plainText = String(text).replace(/<[^>]*>/g, '');
-            const id = plainText.toLowerCase()
-              .replace(/[^\w\s-]/g, '')
-              .replace(/\s+/g, '-')
-              .replace(/-+/g, '-');
-            return `<h${level} id="${id}">${text}</h${level}>`;
-          }
-        }
-      });
-
-      const dirtyHtml = marked.parse(text);
+      const dirtyHtml = marked.parse(text || '');
       // XSS対策: DOMPurifyでサニタイズ (id属性を許可)
       const html = DOMPurify.sanitize(dirtyHtml, { ADD_ATTR: ['id'] });
       preview.innerHTML = html;
@@ -183,7 +168,8 @@ async function insertPastedImage(file) {
 }
 
 /**
- * プレビュー内のアンカーリンク（#）をクリックした際のスムーズスクロール
+ * プレビュー内のアンカーリンク（#）をクリックした際のスムーズスクロール (v1.6.7 修正)
+ * window全体がスクロールしてメニューが消えるのを防ぐため、コンテナのスクロールのみを操作する
  */
 preview.addEventListener('click', (e) => {
   const target = e.target.closest('a');
@@ -194,7 +180,15 @@ preview.addEventListener('click', (e) => {
       const id = decodeURIComponent(href.substring(1));
       const element = preview.querySelector(`[id="${id}"]`);
       if (element) {
-        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        // window 全体のスクロールを発生させないよう、プレビューコンテナ内だけで位置調整
+        const containerRect = preview.getBoundingClientRect();
+        const targetRect = element.getBoundingClientRect();
+        const scrollOffset = targetRect.top - containerRect.top;
+        
+        preview.scrollBy({
+          top: scrollOffset,
+          behavior: 'smooth'
+        });
       }
     }
   }

@@ -21,19 +21,52 @@ Neutralino.events.on('ready', async () => {
   await initIPC();
   if (!state.isPrimaryInstance) return;
 
-  // 2. marked.js の設定
+  // 2. marked.js の設定 (v1.6.5)
   if (typeof marked !== 'undefined') {
-    marked.setOptions({
+    marked.use({
       breaks: true,
       gfm: true,
-      highlight: function(code, lang) {
-        if (typeof hljs !== 'undefined') {
-          const language = hljs.getLanguage(lang) ? lang : 'plaintext';
-          return hljs.highlight(code, { language }).value;
+      renderer: {
+        heading(arg1, arg2) {
+          let content, level;
+          if (typeof arg1 === 'object' && arg1 !== null) {
+            // モダン（v12+）形式: { text, depth, tokens, raw }
+            content = arg1.text || '';
+            level = arg1.depth || 1;
+          } else {
+            // 従来形式: (text, level)
+            content = String(arg1);
+            level = arg2 || 1;
+          }
+
+          // IDの生成 (v1.6.6 Unicode/日本語対応)
+          // 記号類のみを除去し、日本語や英数字を保持
+          const plainText = content.replace(/<[^>]*>/g, '');
+          const id = plainText.toLowerCase()
+            .trim()
+            .replace(/[\s\t\n\r\f\v\u3000]/g, '-') // 空白(全角含む)をハイフンに
+            .replace(/[!"#$%&'()*+,./:;<=>?@\[\\\]^`{|}~]/g, '') // 指定記号を削除
+            .replace(/-+/g, '-'); // 連続ハイフンを1つに
+          
+          return `<h${level} id="${id}">${content}</h${level}>`;
         }
-        return code;
       }
     });
+
+    // シンタックスハイライトの設定 (marked v12+ では extensions または walkTokens を推奨する場合もあるが、ここでは hljs 直接呼び出しを維持)
+    if (typeof hljs !== 'undefined') {
+      marked.use({
+        walkTokens(token) {
+          if (token.type === 'code' && token.lang) {
+            try {
+              const language = hljs.getLanguage(token.lang) ? token.lang : 'plaintext';
+              token.escaped = true;
+              token.text = hljs.highlight(token.text, { language }).value;
+            } catch (e) {}
+          }
+        }
+      });
+    }
   }
 
   // 3. UI/イベントの初期化
@@ -46,7 +79,10 @@ Neutralino.events.on('ready', async () => {
   // 4. 初期タブと起動引数の処理
   addTab();
   await handleStartupArgs();
-  updatePreview();
+  // 起動時の初期描画を確実にするため、わずかに遅延させる (v1.6.6)
+  setTimeout(() => {
+    updatePreview();
+  }, 50);
 
   // 5. ウィンドウを表示
   await Neutralino.window.show();

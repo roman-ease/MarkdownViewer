@@ -2,7 +2,7 @@
 
 [![Neutralinojs](https://img.shields.io/badge/Framework-Neutralinojs-blue.svg)](https://neutralino.js.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/Version-1.6.4-green.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/Version-1.6.8-green.svg)](CHANGELOG.md)
 
 Windows向けの軽量・高速なMarkdownビューア兼エディタです。
 [Neutralinojs](https://neutralino.js.org/)を採用し、システム標準のWebView2を利用することで、配布サイズを非常にコンパクト（約2.3MB）に抑えています。
@@ -37,7 +37,8 @@ Windows向けの軽量・高速なMarkdownビューア兼エディタです。
 - **Styling**: Vanilla CSS (Modern UI)
 
 ## 📜 更新履歴（ダイジェスト）
-- **v1.6.4** : 内部的なレンダリングエラーの解消、およびバージョン表示の不整合を修正。
+- **v1.6.8** : PDF印刷時のタブバー混入、および複数ページ出力ができない問題を修正。
+- **v1.6.7** : 目次ジャンプ時にツールバー等の UI が画面外へ消えてしまう問題を修正。
 - **v1.6.3** : レンダリングオプションの最適化により、プレビューが空白になる不具合を修正。
 - **v1.6.2** : 特定の見出し構成（太字等）でプレビューが失敗する不具合を修正。
 - **v1.6.1** : 目次リンクのジャンプ（ページ内スクロール）機能に対応。
