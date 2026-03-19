@@ -11,9 +11,19 @@ async function updatePreview() {
   
   try {
     if (typeof marked !== 'undefined' && typeof marked.parse === 'function') {
-      const dirtyHtml = marked.parse(text);
-      // XSS対策: DOMPurifyでサニタイズ
-      const html = DOMPurify.sanitize(dirtyHtml);
+      // 見出しにIDを付与するためのカスタムレンダラー
+      const renderer = new marked.Renderer();
+      renderer.heading = (text, level) => {
+        const id = text.toLowerCase()
+          .replace(/[^\w\s-]/g, '')
+          .replace(/\s+/g, '-')
+          .replace(/-+/g, '-');
+        return `<h${level} id="${id}">${text}</h${level}>`;
+      };
+
+      const dirtyHtml = marked.parse(text, { renderer });
+      // XSS対策: DOMPurifyでサニタイズ (id属性を許可)
+      const html = DOMPurify.sanitize(dirtyHtml, { ADD_ATTR: ['id'] });
       preview.innerHTML = html;
       
       // 画像の相対パスをBase64に変換（完了を待つ）
@@ -166,3 +176,21 @@ async function insertPastedImage(file) {
     showError('画像の保存に失敗しました', err);
   }
 }
+
+/**
+ * プレビュー内のアンカーリンク（#）をクリックした際のスムーズスクロール
+ */
+preview.addEventListener('click', (e) => {
+  const target = e.target.closest('a');
+  if (target) {
+    const href = target.getAttribute('href');
+    if (href && href.startsWith('#')) {
+      e.preventDefault();
+      const id = decodeURIComponent(href.substring(1));
+      const element = preview.querySelector(`[id="${id}"]`);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+  }
+});
