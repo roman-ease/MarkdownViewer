@@ -1,6 +1,6 @@
 'use strict';
 
-const { ipcMain, dialog, shell, app, clipboard } = require('electron');
+const { ipcMain, dialog, shell, app, clipboard, Menu } = require('electron');
 const path = require('path');
 const fs = require('fs');
 
@@ -228,6 +228,15 @@ function registerIpcHandlers(mainWindow, sessionManager, fileWatcher) {
   ipcMain.on('set-title', (event, title) => {
     if (mainWindow && !mainWindow.isDestroyed()) {
       mainWindow.setTitle(title);
+    }
+  });
+
+  // ─── メニューアイテムのチェック状態更新 ─────────────────────────
+  ipcMain.on('set-menu-item-checked', (event, id, checked) => {
+    const menu = Menu.getApplicationMenu();
+    if (menu) {
+      const item = menu.getMenuItemById(id);
+      if (item) item.checked = checked;
     }
   });
 

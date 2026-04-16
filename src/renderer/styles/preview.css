@@ -10,6 +10,7 @@
 .preview-body {
   max-width: 820px;
   margin: 0 auto;
+  font-family: 'Segoe UI Variable Text', 'Segoe UI', 'Yu Gothic UI', system-ui, sans-serif;
 }
 
 /* Headings */
@@ -184,7 +185,8 @@
 
 /* Strong / Em */
 .preview-body strong { font-weight: 700; }
-.preview-body em { font-style: italic; }
+/* oblique 15deg forces a visible slant even for Japanese fonts that lack a native italic variant */
+.preview-body em { font-style: oblique 15deg; font-synthesis: style; }
 
 /* Empty state */
 .preview-empty {

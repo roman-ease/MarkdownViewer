@@ -25,8 +25,8 @@ const Settings = (() => {
     encoding: 'utf8',
     lineEnding: 'lf',
     restoreSession: true,
-    syntaxTheme: 'github-dark',
-    mermaidTheme: 'dark',
+    syntaxTheme: 'auto',
+    mermaidTheme: 'auto',
     katexEnabled: false,
     openLinksInBrowser: false,
     rememberWindowSize: true,
@@ -73,7 +73,13 @@ const Settings = (() => {
       'vs2015': 'vs2015',
       'monokai': 'monokai',
     };
-    const hljsTheme = themeMap[_settings.syntaxTheme] || 'github-dark';
+    // auto の場合はアプリテーマに応じて自動選択
+    const autoMap = { dark: 'github-dark', light: 'github', sepia: 'github' };
+    const syntaxSetting = _settings.syntaxTheme;
+    const resolved = (!syntaxSetting || syntaxSetting === 'auto')
+      ? autoMap[theme || 'dark'] || 'github-dark'
+      : syntaxSetting;
+    const hljsTheme = themeMap[resolved] || 'github-dark';
     const link = document.getElementById('hljs-theme');
     if (link) {
       link.href = `../../node_modules/highlight.js/styles/${hljsTheme}.css`;

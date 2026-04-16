@@ -44,6 +44,29 @@ const Editor = (() => {
     // スタイル適用
     applyStyleToInstance(cm, settings);
 
+    // TSV/Excel 貼り付け → Markdown テーブル変換
+    // cm.on('paste') は CodeMirror が自ら処理する前に発火するため、
+    // event.preventDefault() を呼ぶと CM の生テキスト挿入をスキップできる
+    cm.on('paste', (editor, event) => {
+      const text = event.clipboardData && event.clipboardData.getData('text/plain');
+      if (!text) return;
+      const rows = _parseTsv(text);
+      if (rows.length >= 2 && rows[0].length > 1) {
+        event.preventDefault();
+        const maxCols = Math.max(...rows.map(r => r.length));
+        // セル内の | はエスケープ、改行は <br> に変換
+        const esc = s => s.replace(/\|/g, '\\|').replace(/\n/g, '<br>');
+        const header = rows[0].map(c => esc(c.trim()) || 'ヘッダー');
+        const sep = Array(maxCols).fill('---');
+        const tableRows = rows.slice(1).map(r => {
+          const cells = Array(maxCols).fill('').map((_, i) => esc((r[i] || '').trim()));
+          return `| ${cells.join(' | ')} |`;
+        });
+        const table = `\n| ${header.join(' | ')} |\n| ${sep.join(' | ')} |\n${tableRows.join('\n')}\n`;
+        editor.replaceSelection(table);
+      }
+    });
+
     // 変更イベント
     cm.on('change', () => {
       const tab = Tabs.getActiveTab();
@@ -66,8 +89,11 @@ const Editor = (() => {
   // ─── タブ切替時のアクティブインスタンス切替 ──────────────────────────────
   function activate(tabId, content, scrollTop) {
     // 全インスタンスを非表示
-    _instances.forEach((cm, id) => {
-      cm.getWrapperElement().style.display = 'none';
+    // getWrapperElement() は .CodeMirror 要素を返す。その親が
+    // position:absolute;inset:0 の外側ラッパーなので、そちらを hidden にしないと
+    // 見えない外側 div がマウス・キーボードイベントを横取りしてしまう。
+    _instances.forEach((cm) => {
+      cm.getWrapperElement().parentElement.style.display = 'none';
     });
 
     let cm = _instances.get(tabId);
@@ -76,7 +102,7 @@ const Editor = (() => {
       cm.setValue(content || '');
     }
 
-    cm.getWrapperElement().style.display = '';
+    cm.getWrapperElement().parentElement.style.display = '';
     _cm = cm;
 
     // スクロール位置復元
@@ -94,7 +120,8 @@ const Editor = (() => {
   function destroyInstance(tabId) {
     const cm = _instances.get(tabId);
     if (cm) {
-      cm.getWrapperElement().remove();
+      // 外側ラッパーごと削除しないと空の position:absolute div が残り続ける
+      cm.getWrapperElement().parentElement.remove();
       _instances.delete(tabId);
     }
     if (_cm === cm) _cm = null;
@@ -255,33 +282,67 @@ const Editor = (() => {
     });
   }
 
-  // Excel/TSV 貼り付け → Markdown テーブル変換
-  function handlePaste(cm, event) {
-    const text = event.clipboardData && event.clipboardData.getData('text/plain');
-    if (!text) return;
+  // RFC 4180 準拠の TSV パーサー
+  // ダブルクォートで囲まれたフィールドは改行・タブ・引用符を含められる
+  function _parseTsv(text) {
+    const rows = [];
+    let i = 0;
+    const n = text.length;
 
-    // TSV検出: タブ区切りの行が2行以上あるか
-    const lines = text.split('\n').filter(l => l.trim());
-    const hasTabs = lines.every(l => l.includes('\t'));
-    if (lines.length >= 2 && hasTabs) {
-      event.preventDefault();
-      const rows = lines.map(l => l.split('\t'));
-      const maxCols = Math.max(...rows.map(r => r.length));
-      const header = rows[0].map(c => c.trim() || 'ヘッダー');
-      const sep = Array(maxCols).fill('---');
-      const tableRows = rows.slice(1).map(r => {
-        const cells = Array(maxCols).fill('').map((_, i) => (r[i] || '').trim());
-        return `| ${cells.join(' | ')} |`;
-      });
-      const table = `\n| ${header.join(' | ')} |\n| ${sep.join(' | ')} |\n${tableRows.join('\n')}\n`;
-      cm.replaceSelection(table);
+    while (i < n) {
+      const row = [];
+
+      while (true) {
+        let field = '';
+
+        if (i < n && text[i] === '"') {
+          // クォートフィールド: "..." の中は改行・タブ可、"" はエスケープ済み引用符
+          i++;
+          while (i < n) {
+            if (text[i] === '"') {
+              if (i + 1 < n && text[i + 1] === '"') {
+                field += '"';
+                i += 2;
+              } else {
+                i++;
+                break;
+              }
+            } else {
+              field += text[i++];
+            }
+          }
+        } else {
+          // 非クォートフィールド
+          while (i < n && text[i] !== '\t' && text[i] !== '\r' && text[i] !== '\n') {
+            field += text[i++];
+          }
+        }
+
+        row.push(field);
+
+        if (i >= n || text[i] === '\r' || text[i] === '\n') {
+          if (i < n && text[i] === '\r') i++;
+          if (i < n && text[i] === '\n') i++;
+          break;
+        }
+        if (text[i] === '\t') i++;
+      }
+
+      if (row.some(f => f.trim() !== '')) rows.push(row);
     }
+
+    return rows;
   }
 
   // 画像クリップボード貼り付け
   async function handleImagePaste(event, filePath) {
     const items = event.clipboardData && event.clipboardData.items;
     if (!items) return false;
+
+    // テキストが含まれている場合は画像として処理しない
+    // (Excel等のセルコピーは image/png と text/plain(TSV) を両方含む)
+    const textContent = event.clipboardData.getData('text/plain');
+    if (textContent) return false;
 
     for (const item of items) {
       if (item.type.startsWith('image/')) {
@@ -393,7 +454,6 @@ const Editor = (() => {
     insertMermaidTemplate,
     toggleTaskItem,
     setupAutoPair,
-    handlePaste,
     handleImagePaste,
     applySettings,
     focus,

@@ -21,6 +21,17 @@ const Preview = (() => {
   let _mermaidLoaded = false;
   let _katexLoaded = false;
   let _mermaidModule = null;
+  let _currentMermaidTheme = null;
+
+  // アプリテーマ → Mermaid テーマのマッピング
+  const _MERMAID_THEME_MAP = { dark: 'dark', light: 'default', sepia: 'neutral' };
+
+  function _resolveMermaidTheme() {
+    const setting = Settings.get('mermaidTheme');
+    if (setting && setting !== 'auto') return setting;
+    const appTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+    return _MERMAID_THEME_MAP[appTheme] || 'dark';
+  }
   let _katexModule = null;
   let _renderTimer = null;
   const DEBOUNCE_MS = 250;
@@ -146,34 +157,54 @@ const Preview = (() => {
   // ─── Mermaid ─────────────────────────────────────────────────────────────
 
   async function renderMermaid(nodes) {
+    const wantedTheme = _resolveMermaidTheme();
+
     if (!_mermaidLoaded) {
       try {
         // mermaid.min.js を <script> タグで読み込み済み → globalThis.mermaid を使用
         // dynamic import は ts-dedent などのベア指定子を解決できないため使用しない
         if (!globalThis.mermaid) throw new Error('mermaid がロードされていません');
         _mermaidModule = globalThis.mermaid;
-        const theme = Settings.get('mermaidTheme') || 'dark';
         _mermaidModule.initialize({
           startOnLoad: false,
-          theme,
+          theme: wantedTheme,
           securityLevel: 'loose',
           fontFamily: 'inherit',
         });
         _mermaidLoaded = true;
+        _currentMermaidTheme = wantedTheme;
       } catch (err) {
         nodes.forEach(n => { n.textContent = `(Mermaid の読み込みに失敗しました: ${err.message})`; });
         return;
       }
+    } else if (_currentMermaidTheme !== wantedTheme) {
+      // テーマ変更時に再初期化
+      _mermaidModule.initialize({
+        startOnLoad: false,
+        theme: wantedTheme,
+        securityLevel: 'loose',
+        fontFamily: 'inherit',
+      });
+      _currentMermaidTheme = wantedTheme;
     }
 
     for (const node of nodes) {
+      const code = node.textContent;
       try {
-        const code = node.textContent;
         const id = `mermaid-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+        // parseError コールバックで構文エラーを検知 (v11はthrowせずにエラーSVGを返す場合がある)
+        let _parseError = null;
+        _mermaidModule.parseError = (err) => { _parseError = err; };
         const { svg } = await _mermaidModule.render(id, code);
-        node.innerHTML = svg;
-      } catch (err) {
-        node.innerHTML = `<span style="color:var(--toast-error-border);font-size:12px;">Mermaid エラー: ${escapeHtml(err.message)}</span>`;
+        if (_parseError) {
+          // 構文エラー: エラーSVGを表示せず元のテキストを維持
+          node.textContent = code;
+        } else {
+          node.innerHTML = svg;
+        }
+      } catch {
+        // 入力途中の不完全な構文は黙って無視し元のテキストを維持
+        node.textContent = code;
       }
     }
   }

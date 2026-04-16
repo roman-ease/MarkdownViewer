@@ -9,6 +9,22 @@ const Toolbar = (() => {
   let _viewMode = 'split'; // 'split' | 'preview'
   let _syncScroll = true;
 
+  // ─── Mermaid テンプレート ─────────────────────────────────────────────────
+  const _MERMAID_TEMPLATES = {
+    flowchart:
+      '\n```mermaid\nflowchart TD\n    A[開始] --> B{条件}\n    B -->|はい| C[処理1]\n    B -->|いいえ| D[処理2]\n    C --> E[終了]\n    D --> E\n```\n',
+    sequence:
+      '\n```mermaid\nsequenceDiagram\n    participant A as クライアント\n    participant B as サーバー\n    A->>B: リクエスト\n    B-->>A: レスポンス\n    A->>B: 確認\n    B-->>A: 完了\n```\n',
+    class:
+      '\n```mermaid\nclassDiagram\n    class Animal {\n        +String name\n        +int age\n        +speak() void\n    }\n    class Dog {\n        +fetch() void\n    }\n    Animal <|-- Dog\n```\n',
+    er:
+      '\n```mermaid\nerDiagram\n    USER {\n        int id PK\n        string name\n        string email\n    }\n    ORDER {\n        int id PK\n        int user_id FK\n        date created_at\n    }\n    USER ||--o{ ORDER : "places"\n```\n',
+    state:
+      '\n```mermaid\nstateDiagram-v2\n    [*] --> 待機\n    待機 --> 処理中 : 開始\n    処理中 --> 完了 : 成功\n    処理中 --> エラー : 失敗\n    完了 --> [*]\n    エラー --> 待機 : リトライ\n```\n',
+    gantt:
+      '\n```mermaid\ngantt\n    title プロジェクト計画\n    dateFormat YYYY-MM-DD\n    section 設計\n        要件定義   :a1, 2024-01-01, 7d\n        設計書作成 :a2, after a1, 5d\n    section 開発\n        実装       :b1, after a2, 14d\n        テスト     :b2, after b1, 7d\n```\n',
+  };
+
   // ─── Init ────────────────────────────────────────────────────────────────
   function init() {
     // ツールバーボタン
@@ -41,10 +57,26 @@ const Toolbar = (() => {
       recentMenu.classList.toggle('hidden');
     });
 
+    // Mermaid テンプレートドロップダウン
+    const mermaidBtn = document.getElementById('mermaid-btn');
+    const mermaidMenu = document.getElementById('mermaid-menu');
+    mermaidBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      mermaidMenu.classList.toggle('hidden');
+    });
+    mermaidMenu.addEventListener('click', (e) => {
+      const item = e.target.closest('[data-mermaid]');
+      if (!item) return;
+      const tmpl = _MERMAID_TEMPLATES[item.dataset.mermaid];
+      if (tmpl) Editor.insertText(tmpl);
+      mermaidMenu.classList.add('hidden');
+    });
+
     // グローバルクリックでドロップダウンを閉じる
     document.addEventListener('click', () => {
       themeMenu.classList.add('hidden');
       recentMenu.classList.add('hidden');
+      mermaidMenu.classList.add('hidden');
     });
 
     // フォーカスモード: ホバーで一時表示
@@ -73,7 +105,7 @@ const Toolbar = (() => {
       case 'open-file':     window.App.openFile(); break;
       case 'save':          window.App.saveCurrentTab(); break;
       case 'bold':          Editor.formatWrap('**', '**'); break;
-      case 'italic':        Editor.formatWrap('_', '_'); break;
+      case 'italic':        Editor.formatWrap('*', '*'); break;
       case 'strikethrough': Editor.formatWrap('~~', '~~'); break;
       case 'inline-code':   Editor.formatWrap('`', '`'); break;
       case 'code-block':    Editor.insertText('\n```\n\n```\n'); break;
@@ -83,7 +115,6 @@ const Toolbar = (() => {
       case 'hr':            Editor.insertText('\n---\n'); break;
       case 'insert-table':  _showTableDialog(); break;
       case 'insert-toc':    Editor.insertTOC(); break;
-      case 'insert-mermaid': Editor.insertMermaidTemplate(); break;
       case 'find':          Search.open(false); break;
       case 'view-split':    setViewMode('split'); break;
       case 'view-preview':  setViewMode('preview'); break;
@@ -124,6 +155,8 @@ const Toolbar = (() => {
       toolbar.classList.remove('focus-hidden');
       btn.classList.remove('active');
     }
+    // メニューのチェック状態をツールバーボタンと同期
+    ipcRenderer.send('set-menu-item-checked', 'focus-mode', _focusMode);
     Editor.refresh();
   }
 
@@ -271,7 +304,7 @@ const Toolbar = (() => {
     ipcRenderer.on('tab-next', () => Tabs.nextTab());
     ipcRenderer.on('tab-prev', () => Tabs.prevTab());
     ipcRenderer.on('format-bold', () => Editor.formatWrap('**', '**'));
-    ipcRenderer.on('format-italic', () => Editor.formatWrap('_', '_'));
+    ipcRenderer.on('format-italic', () => Editor.formatWrap('*', '*'));
     ipcRenderer.on('format-link', () => Editor.insertLink());
   }
 

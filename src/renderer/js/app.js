@@ -38,6 +38,11 @@ const App = (() => {
     Settings.onChange((s) => {
       Editor.applySettings(s);
       _resetAutoSave();
+      // テーマ変更時などにプレビューを再レンダリング
+      const tab = Tabs.getActiveTab();
+      if (tab) {
+        Preview.scheduleRender(tab.content || Editor.getValue(tab.id), tab.filePath);
+      }
     });
 
     // セッション復元
@@ -221,6 +226,8 @@ const App = (() => {
     });
 
     Notifications.show('保存しました', 'success', 1500);
+    // ネイティブダイアログ後にエディタのフォーカスを復元
+    setTimeout(() => Editor.focus(), 50);
     return true;
   }
 
@@ -382,15 +389,11 @@ const App = (() => {
     });
 
     // 画像クリップボード貼り付け
+    // TSV変換は editor.js の cm.on('paste') で処理済み (二重挿入を防ぐため)
     document.addEventListener('paste', async (e) => {
       const tab = Tabs.getActiveTab();
       if (!tab) return;
-      const handled = await Editor.handleImagePaste(e, tab.filePath);
-      if (!handled) {
-        // TSV テーブル変換
-        const cm = Editor.getActiveInstance();
-        if (cm) Editor.handlePaste(cm, e);
-      }
+      await Editor.handleImagePaste(e, tab.filePath);
     });
   }
 

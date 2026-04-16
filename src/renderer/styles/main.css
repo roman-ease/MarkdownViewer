@@ -4,11 +4,12 @@
 html, body {
   height: 100%;
   overflow: hidden;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: 'Segoe UI Variable', 'Segoe UI', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   font-size: 13px;
   background: var(--bg-base);
   color: var(--text-primary);
   user-select: none;
+  -webkit-font-smoothing: antialiased;
 }
 
 button {
@@ -35,9 +36,9 @@ input:focus, select:focus {
 }
 
 /* Scrollbars */
-::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: var(--scrollbar-track); }
-::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 4px; }
+::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
 
 /* ─── Layout ─────────────────────────────────────────────────────────────── */
@@ -51,10 +52,10 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 36px;
+  height: 40px;
   background: var(--toolbar-bg);
   border-bottom: 1px solid var(--border-color);
-  padding: 0 6px;
+  padding: 0 8px;
   flex-shrink: 0;
   transition: opacity 0.2s;
   position: relative;
@@ -77,53 +78,68 @@ body {
 .toolbar-left, .toolbar-right {
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: 1px;
 }
 
 .tb-btn {
-  width: 28px;
-  height: 26px;
+  width: 30px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 4px;
+  border-radius: 5px;
   color: var(--text-secondary);
-  font-size: 13px;
-  transition: background 0.1s, color 0.1s;
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0;
+  transition: background 0.12s, color 0.12s;
   position: relative;
 }
 .tb-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
 .tb-btn.active { background: var(--bg-active); color: var(--text-accent); }
-.tb-btn svg { width: 14px; height: 14px; fill: currentColor; }
+.tb-btn svg { width: 15px; height: 15px; }
 
 .tb-separator {
   width: 1px;
-  height: 18px;
+  height: 16px;
   background: var(--border-color);
-  margin: 0 4px;
+  margin: 0 5px;
+  opacity: 0.6;
+}
+
+/* Toolbar dropdown wrapper (left-side dropdowns) */
+.tb-dropdown-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.tb-dropdown-wrap .dropdown-menu {
+  top: 100%;
+  left: 0;
+  right: auto;
 }
 
 /* Dropdown menus */
 .dropdown-menu {
   position: absolute;
-  top: 36px;
+  top: 40px;
   right: 0;
   background: var(--bg-elevated);
   border: 1px solid var(--border-color);
-  border-radius: 4px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  border-radius: 6px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.35);
   min-width: 180px;
   z-index: 200;
   padding: 4px 0;
 }
 .dropdown-item {
-  padding: 6px 14px;
+  padding: 7px 14px;
   cursor: pointer;
   color: var(--text-primary);
   font-size: 13px;
 }
 .dropdown-item:hover { background: var(--bg-hover); }
-.dropdown-item.active { color: var(--text-accent); }
+.dropdown-item.active { color: var(--text-accent); font-weight: 500; }
 .hidden { display: none !important; }
 
 /* ─── Tab Bar ────────────────────────────────────────────────────────────── */
@@ -132,7 +148,7 @@ body {
   align-items: stretch;
   background: var(--bg-elevated);
   border-bottom: 1px solid var(--border-color);
-  height: 34px;
+  height: 36px;
   flex-shrink: 0;
   overflow-x: auto;
   overflow-y: hidden;
@@ -152,7 +168,7 @@ body {
   padding: 0 10px 0 14px;
   min-width: 100px;
   max-width: 200px;
-  height: 34px;
+  height: 36px;
   background: var(--tab-bg);
   border-right: 1px solid var(--border-color);
   cursor: pointer;
@@ -201,7 +217,7 @@ body {
 
 #new-tab-btn {
   width: 32px;
-  height: 34px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -262,7 +278,7 @@ body {
 }
 #editor-container .CodeMirror {
   height: 100% !important;  /* 絶対配置ラッパー内で全高を占有 */
-  font-family: var(--editor-font, 'Consolas, "Courier New", monospace');
+  font-family: var(--editor-font, 'Cascadia Code', 'Cascadia Mono', 'JetBrains Mono', Consolas, monospace);
   font-size: var(--editor-font-size, 14px);
   line-height: var(--editor-line-height, 1.6);
   background: var(--editor-bg);
@@ -373,7 +389,7 @@ body.view-preview #preview-pane { border-left: none; }
 /* ─── Search Panel ───────────────────────────────────────────────────────── */
 .search-panel {
   position: absolute;
-  top: 36px + 34px;
+  top: 76px;
   right: 16px;
   background: var(--bg-elevated);
   border: 1px solid var(--border-color);

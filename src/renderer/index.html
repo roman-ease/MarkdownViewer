@@ -25,13 +25,13 @@
   <div id="toolbar" class="toolbar">
     <div class="toolbar-left">
       <button class="tb-btn" data-action="new-file" title="新規 (Ctrl+N)">
-        <svg viewBox="0 0 16 16"><path d="M9 1H4a1 1 0 00-1 1v12a1 1 0 001 1h8a1 1 0 001-1V6l-4-5zm-1 1l3 4H8V2z"/></svg>
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M9 1H4a1 1 0 00-1 1v12a1 1 0 001 1h8a1 1 0 001-1V6l-4-5zm-1 1l3 4H8V2z"/></svg>
       </button>
       <button class="tb-btn" data-action="open-file" title="開く (Ctrl+O)">
-        <svg viewBox="0 0 16 16"><path d="M1 3.5A1.5 1.5 0 012.5 2h2.764c.958 0 1.76.56 2.094 1.37l.195.49A.5.5 0 008 4h5.5A1.5 1.5 0 0115 5.5v7a1.5 1.5 0 01-1.5 1.5h-11A1.5 1.5 0 011 12.5v-9z"/></svg>
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M1 3.5A1.5 1.5 0 012.5 2h2.764c.958 0 1.76.56 2.094 1.37l.195.49A.5.5 0 008 4h5.5A1.5 1.5 0 0115 5.5v7a1.5 1.5 0 01-1.5 1.5h-11A1.5 1.5 0 011 12.5v-9z"/></svg>
       </button>
       <button class="tb-btn" data-action="save" title="保存 (Ctrl+S)">
-        <svg viewBox="0 0 16 16"><path d="M2 1a1 1 0 00-1 1v12a1 1 0 001 1h12a1 1 0 001-1V4.414a1 1 0 00-.293-.707L11.293 1.3A1 1 0 0010.586 1H2zm3.5 11a1.5 1.5 0 110-3 1.5 1.5 0 010 3zM10 2v3H5V2h5z"/></svg>
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 1a1 1 0 00-1 1v12a1 1 0 001 1h12a1 1 0 001-1V4.414a1 1 0 00-.293-.707L11.293 1.3A1 1 0 0010.586 1H2zm3.5 11a1.5 1.5 0 110-3 1.5 1.5 0 010 3zM10 2v3H5V2h5z"/></svg>
       </button>
       <div class="tb-separator"></div>
 
@@ -41,45 +41,55 @@
       <button class="tb-btn" data-action="strikethrough" title="打ち消し">~~</button>
       <button class="tb-btn" data-action="inline-code" title="インラインコード">`</button>
       <button class="tb-btn" data-action="code-block" title="コードブロック">```</button>
-      <button class="tb-btn" data-action="link" title="リンク (Ctrl+K)">🔗</button>
-      <button class="tb-btn" data-action="image" title="画像">🖼</button>
+      <button class="tb-btn" data-action="link" title="リンク (Ctrl+K)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 9.5a3.54 3.54 0 005 0l2-2a3.54 3.54 0 00-5-5L7.5 3.5"/><path d="M9.5 6.5a3.54 3.54 0 00-5 0l-2 2a3.54 3.54 0 005 5l1-1"/></svg></button>
+      <button class="tb-btn" data-action="image" title="画像"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="2.5" width="13" height="11" rx="1.5"/><circle cx="5.5" cy="6" r="1.5"/><path d="M1.5 11l4-4 3 3 2-2 4 4"/></svg></button>
       <button class="tb-btn" data-action="blockquote" title="引用">&gt;</button>
       <button class="tb-btn" data-action="hr" title="水平線">—</button>
       <div class="tb-separator"></div>
 
       <!-- 挿入 -->
-      <button class="tb-btn" data-action="insert-table" title="テーブル挿入 (Ctrl+Shift+T)">⊞</button>
-      <button class="tb-btn" data-action="insert-toc" title="目次生成 (Ctrl+Shift+C)">≡</button>
-      <button class="tb-btn" data-action="insert-mermaid" title="Mermaid テンプレート">◈</button>
+      <button class="tb-btn" data-action="insert-table" title="テーブル挿入 (Ctrl+Shift+T)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="1.5" width="13" height="13" rx="1"/><path d="M1.5 6h13M6 6v9M6 1.5v4.5"/></svg></button>
+      <button class="tb-btn" data-action="insert-toc" title="目次生成 (Ctrl+Shift+C)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 4.5h12M2 8h8M2 11.5h10"/></svg></button>
+      <div class="tb-dropdown-wrap">
+        <button class="tb-btn" id="mermaid-btn" title="Mermaid テンプレート"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="1" width="8" height="4" rx="1"/><rect x="1" y="11" width="5" height="4" rx="1"/><rect x="10" y="11" width="5" height="4" rx="1"/><path d="M8 5v2.5M8 7.5L3.5 11M8 7.5L12.5 11"/></svg></button>
+        <div id="mermaid-menu" class="dropdown-menu hidden">
+          <div class="dropdown-item" data-mermaid="flowchart">フローチャート</div>
+          <div class="dropdown-item" data-mermaid="sequence">シーケンス図</div>
+          <div class="dropdown-item" data-mermaid="class">クラス図</div>
+          <div class="dropdown-item" data-mermaid="er">ER 図</div>
+          <div class="dropdown-item" data-mermaid="state">状態遷移図</div>
+          <div class="dropdown-item" data-mermaid="gantt">ガントチャート</div>
+        </div>
+      </div>
       <div class="tb-separator"></div>
 
       <!-- 検索 -->
-      <button class="tb-btn" data-action="find" title="検索 (Ctrl+F)">🔍</button>
+      <button class="tb-btn" data-action="find" title="検索 (Ctrl+F)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="6.5" cy="6.5" r="4.5"/><path d="M14 14l-3-3"/></svg></button>
     </div>
 
     <div class="toolbar-right">
       <!-- 最近使ったファイル -->
       <button class="tb-btn" id="recent-btn" title="最近使ったファイル">
-        <svg viewBox="0 0 16 16"><path d="M8 3.5a.5.5 0 00-1 0V9a.5.5 0 00.252.434l3.5 2a.5.5 0 00.496-.868L8 8.71V3.5z"/><path d="M8 16A8 8 0 108 0a8 8 0 000 16zm7-8A7 7 0 111 8a7 7 0 0114 0z"/></svg>
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 3.5a.5.5 0 00-1 0V9a.5.5 0 00.252.434l3.5 2a.5.5 0 00.496-.868L8 8.71V3.5z"/><path d="M8 16A8 8 0 108 0a8 8 0 000 16zm7-8A7 7 0 111 8a7 7 0 0114 0z"/></svg>
       </button>
       <div id="recent-menu" class="dropdown-menu hidden"></div>
 
       <div class="tb-separator"></div>
 
       <!-- ビューモード -->
-      <button class="tb-btn active" id="view-split-btn" data-action="view-split" title="分割ビュー">⬜⬜</button>
-      <button class="tb-btn" id="view-preview-btn" data-action="view-preview" title="プレビューのみ">👁</button>
+      <button class="tb-btn active" id="view-split-btn" data-action="view-split" title="分割ビュー"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="2" width="6" height="12" rx="1"/><rect x="9" y="2" width="6" height="12" rx="1"/></svg></button>
+      <button class="tb-btn" id="view-preview-btn" data-action="view-preview" title="プレビューのみ"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 8s2.5-5 7-5 7 5 7 5-2.5 5-7 5-7-5-7-5z"/><circle cx="8" cy="8" r="2"/></svg></button>
       <div class="tb-separator"></div>
 
       <!-- 同期スクロール -->
-      <button class="tb-btn active" id="sync-scroll-btn" data-action="toggle-sync-scroll" title="同期スクロール">⇅</button>
+      <button class="tb-btn active" id="sync-scroll-btn" data-action="toggle-sync-scroll" title="同期スクロール"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v12M5 5l3-3 3 3M5 11l3 3 3-3"/></svg></button>
 
       <!-- フォーカスモード -->
-      <button class="tb-btn" id="focus-mode-btn" data-action="toggle-focus-mode" title="フォーカスモード (Ctrl+Shift+F)">⛶</button>
+      <button class="tb-btn" id="focus-mode-btn" data-action="toggle-focus-mode" title="フォーカスモード (Ctrl+Shift+F)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 1H2a1 1 0 00-1 1v3M11 1h3a1 1 0 011 1v3M1 11v3a1 1 0 001 1h3M15 11v3a1 1 0 01-1 1h-3"/></svg></button>
       <div class="tb-separator"></div>
 
       <!-- テーマ -->
-      <button class="tb-btn" id="theme-btn" title="テーマ切替">◑</button>
+      <button class="tb-btn" id="theme-btn" title="テーマ切替"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M8 2a6 6 0 000 12V2z" fill="currentColor" stroke="none"/></svg></button>
       <div id="theme-menu" class="dropdown-menu hidden">
         <div class="dropdown-item" data-theme="dark">Dark</div>
         <div class="dropdown-item" data-theme="light">Light</div>
@@ -87,7 +97,7 @@
       </div>
 
       <!-- 設定 -->
-      <button class="tb-btn" data-action="settings" title="設定">⚙</button>
+      <button class="tb-btn" data-action="settings" title="設定"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="2.5"/><path d="M8 1.5V3M8 13v1.5M1.5 8H3M13 8h1.5M3.4 3.4l1 1M11.6 11.6l1 1M3.4 12.6l1-1M11.6 4.4l1-1"/></svg></button>
     </div>
   </div>
 
@@ -281,6 +291,7 @@
             <div class="settings-group">
               <label>シンタックスハイライトテーマ
                 <select id="s-syntax-theme">
+                  <option value="auto">自動 (テーマ連動)</option>
                   <option value="github-dark">GitHub Dark</option>
                   <option value="github">GitHub Light</option>
                   <option value="atom-one-dark">Atom One Dark</option>
@@ -290,6 +301,7 @@
               </label>
               <label>Mermaid テーマ
                 <select id="s-mermaid-theme">
+                  <option value="auto">自動 (テーマ連動)</option>
                   <option value="dark">Dark</option>
                   <option value="default">Default</option>
                   <option value="neutral">Neutral</option>
