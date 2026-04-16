@@ -1,6 +1,5 @@
 'use strict';
-/* global document, Notifications */
-const { ipcRenderer } = require('electron');
+/* global ipcRenderer, document, Notifications */
 
 /**
  * Settings Manager — 設定の読み込み・保存・UI 管理

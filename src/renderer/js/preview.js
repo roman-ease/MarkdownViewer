@@ -1,11 +1,9 @@
 'use strict';
-/* global document, Settings, Notifications, Tabs */
-const { ipcRenderer } = require('electron');
+/* global ipcRenderer, nodePath, document, Settings, Notifications, Tabs */
 
 const { marked } = require('marked');
 const hljs = require('highlight.js');
 const createDOMPurify = require('dompurify');
-const path = require('path');
 
 const DOMPurify = createDOMPurify(window);
 
@@ -151,8 +149,9 @@ const Preview = (() => {
     if (!_mermaidLoaded) {
       try {
         // mermaid v11 is ESM-only; load via absolute file:// URL
-        const mermaidPath = require('path').resolve(
-          __dirname, '../../../node_modules/mermaid/dist/mermaid.core.mjs'
+        // __dirname は HTML ファイルのディレクトリ (src/renderer/) を指す
+        const mermaidPath = nodePath.resolve(
+          __dirname, '../../node_modules/mermaid/dist/mermaid.core.mjs'
         );
         const mermaidUrl = 'file:///' + mermaidPath.replace(/\\/g, '/');
         _mermaidModule = await import(mermaidUrl);
@@ -233,7 +232,7 @@ const Preview = (() => {
   // ─── Image Path Resolution ───────────────────────────────────────────────
 
   async function resolveImagePaths(content, filePath) {
-    const dir = path.dirname(filePath);
+    const dir = nodePath.dirname(filePath);
     // ![alt](./relative/path.png) パターン
     const imgRegex = /!\[([^\]]*)\]\(([^)]+)\)/g;
     const replacements = [];
@@ -246,7 +245,7 @@ const Preview = (() => {
         continue;
       }
       // 相対または絶対パス
-      const absPath = path.isAbsolute(src) ? src : path.join(dir, src);
+      const absPath = nodePath.isAbsolute(src) ? src : nodePath.join(dir, src);
       try {
         const base64 = await ipcRenderer.invoke('read-image-base64', absPath);
         if (base64) {

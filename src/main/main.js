@@ -119,10 +119,20 @@ async function createWindow() {
   mainWindow.on('move', saveBounds);
 
   // 終了前セッション保存
+  let _closeForced = false;
   mainWindow.on('close', (e) => {
+    if (_closeForced) return; // フォールバック強制終了は通す
     // レンダラーに終了確認を委譲
     e.preventDefault();
     mainWindow.webContents.send('app-before-close');
+
+    // レンダラーが 4 秒以内に confirm-close を返さなければ強制終了
+    setTimeout(() => {
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        _closeForced = true;
+        mainWindow.destroy();
+      }
+    }, 4000);
   });
 
   mainWindow.on('closed', () => {

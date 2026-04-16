@@ -1,6 +1,5 @@
 'use strict';
-/* global document, Tabs, Preview, Settings, Notifications */
-const { ipcRenderer } = require('electron');
+/* global ipcRenderer, document, Tabs, Preview, Settings, Notifications */
 
 /**
  * Export Manager — HTML / PDF エクスポート

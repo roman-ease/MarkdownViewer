@@ -355,6 +355,17 @@
     </div>
   </div>
 
+  <!-- ─── グローバル設定 (重複宣言を防ぐため最初に1回だけ設定) ─── -->
+  <script>
+    // Node.js モジュールをウィンドウグローバルに設定
+    // renderer の <script> タグはグローバルスコープを共有するため
+    // 各ファイルで const 宣言すると "already declared" エラーになる
+    window.ipcRenderer = require('electron').ipcRenderer;
+    window.nodePath    = require('path');
+    window.nodeFs      = require('fs');
+    window.nodeOs      = require('os');
+  </script>
+
   <!-- ─── Scripts ─── -->
   <script src="../../node_modules/codemirror/lib/codemirror.js"></script>
   <script src="../../node_modules/codemirror/mode/markdown/markdown.js"></script>

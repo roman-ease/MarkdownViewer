@@ -1,6 +1,5 @@
 'use strict';
-/* global document, Editor, Tabs, Search, Settings, Notifications */
-const { ipcRenderer } = require('electron');
+/* global ipcRenderer, document, Editor, Tabs, Search, Settings, Notifications */
 
 /**
  * Toolbar — ツールバーボタン・ビューモード・テーマ切替

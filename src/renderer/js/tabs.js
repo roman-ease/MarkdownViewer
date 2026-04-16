@@ -1,6 +1,5 @@
 'use strict';
-/* global document, Editor, Preview, Settings, Notifications */
-const { ipcRenderer } = require('electron');
+/* global ipcRenderer, document, Editor, Preview, Settings, Notifications */
 
 /**
  * Tab Manager — タブの状態管理・UI 管理

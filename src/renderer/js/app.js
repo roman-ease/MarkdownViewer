@@ -1,10 +1,7 @@
 'use strict';
-/* global document, window,
+/* global ipcRenderer, nodePath, document, window,
    Notifications, Settings, Preview, Editor, Tabs,
    Search, Toolbar, StatusBar, ExportManager */
-
-const { ipcRenderer } = require('electron');
-const path = require('path');
 
 /**
  * App — アプリケーションのエントリポイントとファイル操作統合
@@ -133,7 +130,7 @@ const App = (() => {
     let tab;
     if (reuse) {
       Tabs.updateTabState(reuse.id, {
-        title: path.basename(filePath),
+        title: nodePath.basename(filePath),
         filePath,
         content: res.content,
         savedContent: res.content,
@@ -146,7 +143,7 @@ const App = (() => {
       Tabs.activateTab(reuse.id);
     } else {
       tab = Tabs.createTab({
-        title: path.basename(filePath),
+        title: nodePath.basename(filePath),
         filePath,
         content: res.content,
         encoding: res.encoding,
@@ -201,7 +198,7 @@ const App = (() => {
 
     let filePath = result.filePath;
     // 拡張子なしなら .md 付与
-    if (!path.extname(filePath)) filePath += '.md';
+    if (!nodePath.extname(filePath)) filePath += '.md';
 
     const content = Editor.getValue(tabId);
     const res = await ipcRenderer.invoke('write-file', filePath, content, tab.encoding, tab.lineEnding);
@@ -217,7 +214,7 @@ const App = (() => {
 
     Tabs.updateTabState(tabId, {
       filePath,
-      title: path.basename(filePath),
+      title: nodePath.basename(filePath),
       content,
       savedContent: content,
       isDirty: false,
@@ -264,7 +261,7 @@ const App = (() => {
 
     const bar = document.getElementById('file-change-bar');
     const msg = document.getElementById('file-change-msg');
-    msg.textContent = `"${path.basename(filePath)}" が外部で変更されました`;
+    msg.textContent = `"${nodePath.basename(filePath)}" が外部で変更されました`;
     bar.classList.remove('hidden');
 
     document.getElementById('file-change-reload').onclick = async () => {
@@ -287,7 +284,7 @@ const App = (() => {
   function onFileDeleted(filePath) {
     const tab = Tabs.getAllTabs().find(t => t.filePath === filePath);
     if (!tab) return;
-    Notifications.show(`"${path.basename(filePath)}" が削除・移動されました`, 'warning', 6000);
+    Notifications.show(`"${nodePath.basename(filePath)}" が削除・移動されました`, 'warning', 6000);
     Tabs.updateTabState(tab.id, { isDirty: true });
   }
 

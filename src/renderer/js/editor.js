@@ -1,6 +1,5 @@
 'use strict';
-/* global CodeMirror, document, Settings, Preview, Tabs, Notifications */
-const { ipcRenderer } = require('electron');
+/* global ipcRenderer, nodePath, nodeOs, CodeMirror, document, Settings, Preview, Tabs, Notifications */
 
 /**
  * Editor — CodeMirror 5 ラッパー
@@ -297,12 +296,11 @@ const Editor = (() => {
           if (settings.imageSaveMode === 'fixed' && settings.imageSaveFolder) {
             saveDir = settings.imageSaveFolder;
           } else if (filePath) {
-            const { ipcRenderer: ipc } = require('electron');
-            const pathInfo = await ipc.invoke('path-info', filePath);
+            const pathInfo = await ipcRenderer.invoke('path-info', filePath);
             saveDir = pathInfo.dir + '/images';
           } else {
             // 未保存ファイルは一時パス
-            saveDir = require('os').tmpdir() + '/markdown-viewer-images';
+            saveDir = nodeOs.tmpdir() + '/markdown-viewer-images';
           }
 
           await ipcRenderer.invoke('ensure-dir', saveDir);
@@ -313,7 +311,6 @@ const Editor = (() => {
 
           // 相対パスで挿入
           if (filePath) {
-            const nodePath = require('path');
             const rel = nodePath.relative(nodePath.dirname(filePath), destPath).replace(/\\/g, '/');
             insertImage('image', rel);
           } else {
