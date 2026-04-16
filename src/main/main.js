@@ -151,7 +151,7 @@ function extractFilePaths(argv) {
     if (arg.endsWith('.asar') || arg.endsWith('main.js')) continue;
     try {
       const resolved = path.resolve(arg);
-      if (fs.existsSync(resolved)) {
+      if (fs.statSync(resolved).isFile()) {
         files.push(resolved);
       }
     } catch {
