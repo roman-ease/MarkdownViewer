@@ -15,7 +15,7 @@ const Editor = (() => {
   function createInstance(tabId) {
     const settings = Settings.get();
     const wrapper = document.createElement('div');
-    wrapper.style.height = '100%';
+    // CSS の #editor-container > div { position: absolute; inset: 0; } で高さを制御
     container().appendChild(wrapper);
 
     const cm = CodeMirror(wrapper, {
@@ -32,7 +32,7 @@ const Editor = (() => {
         'Tab': (cm) => _handleTab(cm, false),
         'Shift-Tab': (cm) => _handleTab(cm, true),
         'Ctrl-B': () => formatWrap('**', '**'),
-        'Ctrl-I': () => formatWrap('_', '_'),
+        'Ctrl-I': () => formatWrap('*', '*'),
         'Ctrl-K': () => insertLink(),
         'Ctrl-F': () => window.dispatchEvent(new CustomEvent('editor-find')),
         'Ctrl-H': () => window.dispatchEvent(new CustomEvent('editor-replace')),
@@ -175,11 +175,11 @@ const Editor = (() => {
   // テーブル挿入
   function insertTable(cols, rows) {
     if (!_cm) return;
-    const header = Array(cols).fill('ヘッダー').map((h, i) => `${h}${i+1}`).join(' | ');
+    const header = Array.from({ length: cols }, (_, i) => `列${i + 1}`).join(' | ');
     const sep = Array(cols).fill('---').join(' | ');
-    const row = Array(cols).fill('セル').join(' | ');
+    const emptyRow = Array(cols).fill('').join(' | ');
     const lines = [`| ${header} |`, `| ${sep} |`];
-    for (let i = 0; i < rows; i++) lines.push(`| ${row} |`);
+    for (let i = 0; i < rows; i++) lines.push(`| ${emptyRow} |`);
     _cm.replaceSelection('\n' + lines.join('\n') + '\n');
     _cm.focus();
   }
@@ -327,28 +327,23 @@ const Editor = (() => {
 
   // ─── インデント ──────────────────────────────────────────────────────────
   function _handleTab(cm, reverse) {
+    if (reverse) {
+      // Shift-Tab: 常に indentLess (選択有無問わず)
+      CodeMirror.commands.indentLess(cm);
+      return;
+    }
+
     if (cm.somethingSelected()) {
-      const spaces = '  '.repeat(Settings.get('tabSize') === 4 ? 2 : 1);
-      cm.getDoc().eachLine(
-        cm.listSelections()[0].from().line,
-        cm.listSelections()[0].to().line + 1,
-        (line) => {
-          const lineNo = cm.getLineNumber(line);
-          if (reverse) {
-            if (line.text.startsWith('  ')) {
-              cm.replaceRange('', { line: lineNo, ch: 0 }, { line: lineNo, ch: 2 });
-            } else if (line.text.startsWith('\t')) {
-              cm.replaceRange('', { line: lineNo, ch: 0 }, { line: lineNo, ch: 1 });
-            }
-          } else {
-            cm.replaceRange(spaces, { line: lineNo, ch: 0 });
-          }
-        }
-      );
+      // 選択行を一括インデント
+      CodeMirror.commands.indentMore(cm);
     } else {
-      if (reverse) {
-        CodeMirror.commands.indentLess(cm);
+      const cursor = cm.getCursor();
+      const line = cm.getLine(cursor.line);
+      // リスト行 (- / * / + / 1. など) はリストレベルをインデント
+      if (/^\s*([-*+]|\d+\.)\s/.test(line)) {
+        CodeMirror.commands.indentMore(cm);
       } else {
+        // 通常行: タブサイズ分のスペースを挿入
         const spaces = ' '.repeat(Settings.get('tabSize') || 2);
         cm.replaceSelection(spaces);
       }

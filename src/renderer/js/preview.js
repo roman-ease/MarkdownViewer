@@ -148,15 +148,12 @@ const Preview = (() => {
   async function renderMermaid(nodes) {
     if (!_mermaidLoaded) {
       try {
-        // mermaid v11 is ESM-only; load via absolute file:// URL
-        // __dirname は HTML ファイルのディレクトリ (src/renderer/) を指す
-        const mermaidPath = nodePath.resolve(
-          __dirname, '../../node_modules/mermaid/dist/mermaid.core.mjs'
-        );
-        const mermaidUrl = 'file:///' + mermaidPath.replace(/\\/g, '/');
-        _mermaidModule = await import(mermaidUrl);
+        // mermaid.min.js を <script> タグで読み込み済み → globalThis.mermaid を使用
+        // dynamic import は ts-dedent などのベア指定子を解決できないため使用しない
+        if (!globalThis.mermaid) throw new Error('mermaid がロードされていません');
+        _mermaidModule = globalThis.mermaid;
         const theme = Settings.get('mermaidTheme') || 'dark';
-        _mermaidModule.default.initialize({
+        _mermaidModule.initialize({
           startOnLoad: false,
           theme,
           securityLevel: 'loose',
@@ -173,7 +170,7 @@ const Preview = (() => {
       try {
         const code = node.textContent;
         const id = `mermaid-${Date.now()}-${Math.random().toString(36).slice(2)}`;
-        const { svg } = await _mermaidModule.default.render(id, code);
+        const { svg } = await _mermaidModule.render(id, code);
         node.innerHTML = svg;
       } catch (err) {
         node.innerHTML = `<span style="color:var(--toast-error-border);font-size:12px;">Mermaid エラー: ${escapeHtml(err.message)}</span>`;
