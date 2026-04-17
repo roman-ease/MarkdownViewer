@@ -9,7 +9,7 @@ const Settings = (() => {
   let _onChangeCallbacks = [];
 
   const DEFAULTS = {
-    theme: 'dark',
+    theme: 'sepia',
     editorFontSize: 14,
     previewFontSize: 15,
     editorFont: 'Consolas, "Courier New", monospace',

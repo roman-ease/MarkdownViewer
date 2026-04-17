@@ -74,6 +74,7 @@ async function createWindow() {
     backgroundColor: '#1e1e1e',
     show: false,
     title: 'MarkdownViewer',
+    icon: path.join(__dirname, '../../assets/icon.ico'),
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,

@@ -238,6 +238,12 @@ function buildMenu(mainWindow, sessionManager) {
       label: 'ヘルプ(&H)',
       submenu: [
         {
+          label: 'キーボードショートカット',
+          accelerator: 'F1',
+          click: () => send('menu-shortcut-help'),
+        },
+        { type: 'separator' },
+        {
           label: '設定...',
           click: () => send('menu-settings'),
         },
