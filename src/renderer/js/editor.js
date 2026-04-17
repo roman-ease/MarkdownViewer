@@ -341,7 +341,7 @@ const Editor = (() => {
             saveDir = pathInfo.dir + '/images';
           } else {
             // 未保存ファイルは一時パス
-            saveDir = nodeOs.tmpdir() + '/markdown-viewer-images';
+            saveDir = nodeOs.tmpdir() + '/quill-images';
           }
 
           await ipcRenderer.invoke('ensure-dir', saveDir);

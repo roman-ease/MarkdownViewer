@@ -73,7 +73,7 @@ async function createWindow() {
     minHeight: 400,
     backgroundColor: '#1e1e1e',
     show: false,
-    title: 'MarkdownViewer',
+    title: 'Quill',
     icon: path.join(__dirname, '../../assets/icon.ico'),
     webPreferences: {
       nodeIntegration: true,

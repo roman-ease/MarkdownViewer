@@ -58,7 +58,7 @@ const App = (() => {
     // 自動保存
     _resetAutoSave();
 
-    console.log('MarkdownViewer initialized');
+    console.log('Quill initialized');
   }
 
   // ─── ファイル操作 ────────────────────────────────────────────────────────

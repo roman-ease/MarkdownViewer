@@ -242,7 +242,7 @@ const Tabs = (() => {
 
   function _updateTitle(tab) {
     const dirty = tab.isDirty ? '● ' : '';
-    const title = tab.filePath ? `${dirty}${tab.title} — MarkdownViewer` : `${dirty}新規ファイル — MarkdownViewer`;
+    const title = tab.filePath ? `${dirty}${tab.title} — Quill` : `${dirty}新規ファイル — Quill`;
     ipcRenderer.send('set-title', title);
   }
 

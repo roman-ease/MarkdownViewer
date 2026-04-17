@@ -1,6 +1,6 @@
 {
-  "name": "markdown-viewer-pro",
-  "productName": "MarkdownViewer",
+  "name": "quill",
+  "productName": "Quill",
   "version": "1.0.0",
   "description": "A lightweight Markdown editor and viewer for Windows",
   "main": "src/main/main.js",
@@ -16,7 +16,7 @@
     "viewer",
     "electron"
   ],
-  "author": "MarkdownViewer",
+  "author": "roman-ease",
   "license": "MIT",
   "devDependencies": {
     "electron": "^28.3.3",
@@ -32,8 +32,8 @@
     "mermaid": "^11.14.0"
   },
   "build": {
-    "appId": "com.markdownviewer.app",
-    "productName": "MarkdownViewer",
+    "appId": "com.roman-ease.quill",
+    "productName": "Quill",
     "directories": {
       "output": "dist"
     },
@@ -72,7 +72,7 @@
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "MarkdownViewer"
+      "shortcutName": "Quill"
     }
   }
 }
