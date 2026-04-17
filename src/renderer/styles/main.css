@@ -592,6 +592,46 @@ body.view-preview #preview-pane { border-left: none; }
   margin-top: 0;
 }
 
+/* ─── Shortcut Help Dialog ───────────────────────────────────────────────── */
+.shortcut-table-wrap {
+  overflow-y: auto;
+  padding: 8px 20px;
+  flex: 1;
+}
+.shortcut-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.shortcut-table th {
+  text-align: left;
+  padding: 10px 8px 4px;
+  color: var(--text-accent);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border-bottom: 1px solid var(--border-color);
+}
+.shortcut-table td {
+  padding: 5px 8px;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border-color);
+}
+.shortcut-table td:last-child {
+  text-align: right;
+  white-space: nowrap;
+}
+.shortcut-table kbd {
+  display: inline-block;
+  padding: 2px 6px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 12px;
+  color: var(--text-primary);
+}
+
 /* ─── Lightbox ───────────────────────────────────────────────────────────── */
 .lightbox {
   position: fixed;

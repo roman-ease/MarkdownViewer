@@ -359,6 +359,49 @@
   <!-- トースト通知コンテナ -->
   <div id="toast-container"></div>
 
+  <!-- ショートカットヘルプダイアログ -->
+  <div id="shortcut-help-dialog" class="modal-overlay hidden">
+    <div class="modal modal-large">
+      <div class="modal-header">
+        <h3>キーボードショートカット</h3>
+      </div>
+      <div class="shortcut-table-wrap">
+        <table class="shortcut-table">
+          <tbody>
+            <tr><th colspan="2">ファイル</th></tr>
+            <tr><td>新規ファイル</td><td><kbd>Ctrl+N</kbd></td></tr>
+            <tr><td>ファイルを開く</td><td><kbd>Ctrl+O</kbd></td></tr>
+            <tr><td>上書き保存</td><td><kbd>Ctrl+S</kbd></td></tr>
+            <tr><td>名前を付けて保存</td><td><kbd>Ctrl+Shift+S</kbd></td></tr>
+            <tr><th colspan="2">タブ</th></tr>
+            <tr><td>新規タブ</td><td><kbd>Ctrl+T</kbd></td></tr>
+            <tr><td>タブを閉じる</td><td><kbd>Ctrl+W</kbd></td></tr>
+            <tr><td>次のタブ</td><td><kbd>Ctrl+Tab</kbd></td></tr>
+            <tr><td>前のタブ</td><td><kbd>Ctrl+Shift+Tab</kbd></td></tr>
+            <tr><th colspan="2">編集</th></tr>
+            <tr><td>検索</td><td><kbd>Ctrl+F</kbd></td></tr>
+            <tr><td>検索と置換</td><td><kbd>Ctrl+H</kbd></td></tr>
+            <tr><td>太字</td><td><kbd>Ctrl+B</kbd></td></tr>
+            <tr><td>斜体</td><td><kbd>Ctrl+I</kbd></td></tr>
+            <tr><td>リンク挿入</td><td><kbd>Ctrl+K</kbd></td></tr>
+            <tr><td>テーブル挿入</td><td><kbd>Ctrl+Shift+T</kbd></td></tr>
+            <tr><td>目次を生成</td><td><kbd>Ctrl+Shift+C</kbd></td></tr>
+            <tr><th colspan="2">表示</th></tr>
+            <tr><td>フォーカスモード</td><td><kbd>Ctrl+Shift+F</kbd></td></tr>
+            <tr><td>ズームイン</td><td><kbd>Ctrl++</kbd></td></tr>
+            <tr><td>ズームアウト</td><td><kbd>Ctrl+-</kbd></td></tr>
+            <tr><td>ズームリセット</td><td><kbd>Ctrl+0</kbd></td></tr>
+            <tr><th colspan="2">ヘルプ</th></tr>
+            <tr><td>ショートカット一覧</td><td><kbd>F1</kbd></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="modal-actions">
+        <button id="shortcut-help-close-btn" class="btn-primary">閉じる</button>
+      </div>
+    </div>
+  </div>
+
   <!-- バージョン情報ダイアログ -->
   <div id="about-dialog" class="modal-overlay hidden">
     <div class="modal">

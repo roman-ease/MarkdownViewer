@@ -288,6 +288,7 @@ const Toolbar = (() => {
     ipcRenderer.on('menu-export-pdf',   () => window.ExportManager.exportPdf());
     ipcRenderer.on('menu-settings',     () => Settings.openDialog());
     ipcRenderer.on('menu-about',        () => _showAbout());
+    ipcRenderer.on('menu-shortcut-help', () => _showShortcutHelp());
 
     ipcRenderer.on('open-files',    (_, files) => window.App.openFilePaths(files));
     ipcRenderer.on('file-changed',  (_, fp) => window.App.onFileChanged(fp));
@@ -315,6 +316,13 @@ const Toolbar = (() => {
     });
     dlg.classList.remove('hidden');
     document.getElementById('about-close-btn').onclick = () => dlg.classList.add('hidden');
+    dlg.onclick = (e) => { if (e.target === dlg) dlg.classList.add('hidden'); };
+  }
+
+  function _showShortcutHelp() {
+    const dlg = document.getElementById('shortcut-help-dialog');
+    dlg.classList.remove('hidden');
+    document.getElementById('shortcut-help-close-btn').onclick = () => dlg.classList.add('hidden');
     dlg.onclick = (e) => { if (e.target === dlg) dlg.classList.add('hidden'); };
   }
 
