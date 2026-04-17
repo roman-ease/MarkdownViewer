@@ -411,6 +411,10 @@ body.view-preview #preview-pane { border-left: none; }
   height: 26px;
   font-size: 12px;
 }
+#search-input.search-error {
+  outline: 2px solid #e05555;
+  background-color: rgba(224, 85, 85, 0.1);
+}
 .search-panel button {
   height: 26px;
   padding: 0 8px;

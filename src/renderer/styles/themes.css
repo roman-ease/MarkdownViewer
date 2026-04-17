@@ -255,3 +255,173 @@
   --resizer-bg:       #cfc0a4;
   --resizer-hover:    #9b6030;
 }
+
+[data-theme="vaporwave"] {
+  /* Backgrounds — deep purple */
+  --bg-base:        #130a24;
+  --bg-surface:     #1c1035;
+  --bg-elevated:    #271648;
+  --bg-hover:       #341f5e;
+  --bg-active:      #3e2870;
+  --bg-selection:   #4a3280;
+
+  /* Text */
+  --text-primary:   #f0d8ff;
+  --text-secondary: #c4a0e0;
+  --text-muted:     #7850a8;
+  --text-accent:    #ff71ce;
+
+  /* Borders */
+  --border-color:   #3a1e60;
+  --border-focus:   #ff71ce;
+
+  /* Tabs */
+  --tab-bg:             #1c1035;
+  --tab-active-bg:      #130a24;
+  --tab-active-border:  #ff71ce;
+  --tab-unsaved:        #ffcc00;
+
+  /* Chrome */
+  --toolbar-bg:     #1c1035;
+  --statusbar-bg:   #7b1fa2;
+  --statusbar-text: #f9d0ff;
+
+  /* Scrollbar */
+  --scrollbar-thumb: #4a2878;
+  --scrollbar-track: transparent;
+
+  /* Modal */
+  --modal-bg:      #1c1035;
+  --modal-overlay: rgba(10,0,25,0.75);
+
+  /* Toasts */
+  --toast-success-bg:     rgba(20,60,30,0.96);
+  --toast-success-border: #05ffa1;
+  --toast-warning-bg:     rgba(70,45,0,0.96);
+  --toast-warning-border: #ffcc00;
+  --toast-error-bg:       rgba(80,10,30,0.96);
+  --toast-error-border:   #ff4499;
+  --toast-info-bg:        rgba(20,10,60,0.96);
+  --toast-info-border:    #b57bee;
+
+  /* Preview */
+  --preview-bg:                #130a24;
+  --preview-text:              #f0d8ff;
+  --preview-code-bg:           #1c1035;
+  --preview-border:            #3a1e60;
+  --preview-link:              #ff71ce;
+  --preview-blockquote-border: #7b1fa2;
+  --preview-blockquote-bg:     #1a0e30;
+  --preview-table-header:      #271648;
+  --preview-table-border:      #3a1e60;
+  --preview-table-stripe:      #1c1035;
+
+  /* Editor */
+  --editor-bg:           #130a24;
+  --editor-text:         #f0d8ff;
+  --editor-gutter:       #1c1035;
+  --editor-line-active:  #1e1238;
+  --editor-cursor:       #ff71ce;
+
+  /* Syntax — Vaporwave palette */
+  --cm-keyword:    #ff71ce;
+  --cm-string:     #05ffa1;
+  --cm-comment:    #7850a8;
+  --cm-number:     #ffcc00;
+  --cm-operator:   #b57bee;
+  --cm-tag:        #ff4499;
+  --cm-attribute:  #01cdfe;
+  --cm-link:       #01cdfe;
+  --cm-header:     #ff71ce;
+  --cm-hr:         #4a2878;
+
+  --search-highlight: rgba(255,113,206,0.2);
+  --search-current:   rgba(255,113,206,0.45);
+  --resizer-bg:       #3a1e60;
+  --resizer-hover:    #ff71ce;
+}
+
+[data-theme="neon"] {
+  /* Backgrounds — near-black cyberpunk */
+  --bg-base:        #080810;
+  --bg-surface:     #0d0d1a;
+  --bg-elevated:    #121225;
+  --bg-hover:       #191932;
+  --bg-active:      #1e1e40;
+  --bg-selection:   #252550;
+
+  /* Text */
+  --text-primary:   #e8f0ff;
+  --text-secondary: #9090c0;
+  --text-muted:     #484870;
+  --text-accent:    #00ff9f;
+
+  /* Borders */
+  --border-color:   #181830;
+  --border-focus:   #00ff9f;
+
+  /* Tabs */
+  --tab-bg:             #0d0d1a;
+  --tab-active-bg:      #080810;
+  --tab-active-border:  #00ff9f;
+  --tab-unsaved:        #ffe600;
+
+  /* Chrome */
+  --toolbar-bg:     #0d0d1a;
+  --statusbar-bg:   #050510;
+  --statusbar-text: #00ff9f;
+
+  /* Scrollbar */
+  --scrollbar-thumb: #1e1e40;
+  --scrollbar-track: transparent;
+
+  /* Modal */
+  --modal-bg:      #0d0d1a;
+  --modal-overlay: rgba(0,0,8,0.8);
+
+  /* Toasts */
+  --toast-success-bg:     rgba(0,40,20,0.96);
+  --toast-success-border: #00ff9f;
+  --toast-warning-bg:     rgba(50,45,0,0.96);
+  --toast-warning-border: #ffe600;
+  --toast-error-bg:       rgba(60,0,15,0.96);
+  --toast-error-border:   #ff0055;
+  --toast-info-bg:        rgba(0,10,50,0.96);
+  --toast-info-border:    #00b8ff;
+
+  /* Preview */
+  --preview-bg:                #080810;
+  --preview-text:              #e8f0ff;
+  --preview-code-bg:           #0d0d1a;
+  --preview-border:            #181830;
+  --preview-link:              #00ff9f;
+  --preview-blockquote-border: #00805a;
+  --preview-blockquote-bg:     #0a0a18;
+  --preview-table-header:      #121225;
+  --preview-table-border:      #181830;
+  --preview-table-stripe:      #0d0d1a;
+
+  /* Editor */
+  --editor-bg:           #080810;
+  --editor-text:         #e8f0ff;
+  --editor-gutter:       #0d0d1a;
+  --editor-line-active:  #101022;
+  --editor-cursor:       #00ff9f;
+
+  /* Syntax — Neon palette */
+  --cm-keyword:    #ff0090;
+  --cm-string:     #00ff9f;
+  --cm-comment:    #484870;
+  --cm-number:     #ffe600;
+  --cm-operator:   #00b8ff;
+  --cm-tag:        #ff0055;
+  --cm-attribute:  #ff9900;
+  --cm-link:       #00b8ff;
+  --cm-header:     #00ff9f;
+  --cm-hr:         #252550;
+
+  --search-highlight: rgba(0,255,159,0.15);
+  --search-current:   rgba(0,255,159,0.35);
+  --resizer-bg:       #181830;
+  --resizer-hover:    #00ff9f;
+}

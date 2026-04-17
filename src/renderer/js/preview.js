@@ -24,7 +24,7 @@ const Preview = (() => {
   let _currentMermaidTheme = null;
 
   // アプリテーマ → Mermaid テーマのマッピング
-  const _MERMAID_THEME_MAP = { dark: 'dark', light: 'default', sepia: 'neutral' };
+  const _MERMAID_THEME_MAP = { dark: 'dark', light: 'default', sepia: 'neutral', vaporwave: 'dark', neon: 'dark' };
 
   function _resolveMermaidTheme() {
     const setting = Settings.get('mermaidTheme');

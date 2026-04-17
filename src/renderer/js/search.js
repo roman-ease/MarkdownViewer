@@ -32,6 +32,7 @@ const Search = (() => {
   function close() {
     panel().classList.add('hidden');
     replaceRow().classList.add('hidden');
+    searchInput().classList.remove('search-error');
     _clearHighlights();
     Editor.focus();
   }
@@ -43,10 +44,13 @@ const Search = (() => {
     const useRegex = document.getElementById('search-regex').checked;
     const flags = (caseSensitive ? '' : 'i') + extraFlags;
     try {
-      return useRegex
+      const result = useRegex
         ? new RegExp(_query, flags)
         : new RegExp(_escapeRegex(_query), flags);
+      searchInput().classList.remove('search-error');
+      return result;
     } catch {
+      searchInput().classList.add('search-error');
       return null;
     }
   }

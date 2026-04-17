@@ -5,7 +5,7 @@ const fs = require('fs');
 const { app } = require('electron');
 
 const DEFAULT_SETTINGS = {
-  theme: 'dark',
+  theme: 'sepia',
   editorFontSize: 14,
   previewFontSize: 15,
   editorFont: 'Consolas, "Courier New", monospace',

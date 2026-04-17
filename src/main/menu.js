@@ -186,6 +186,18 @@ function buildMenu(mainWindow, sessionManager) {
               id: 'theme-sepia',
               click: () => send('set-theme', 'sepia'),
             },
+            {
+              label: 'Vaporwave',
+              type: 'radio',
+              id: 'theme-vaporwave',
+              click: () => send('set-theme', 'vaporwave'),
+            },
+            {
+              label: 'ネオン',
+              type: 'radio',
+              id: 'theme-neon',
+              click: () => send('set-theme', 'neon'),
+            },
           ],
         },
         { type: 'separator' },

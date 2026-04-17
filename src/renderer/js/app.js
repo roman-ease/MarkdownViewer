@@ -97,7 +97,8 @@ const App = (() => {
 
     // ファイルサイズチェック (2MB)
     try {
-      const { size } = require('fs').statSync(filePath);
+      const stat = await ipcRenderer.invoke('stat-file', filePath);
+      const size = stat.success ? stat.size : 0;
       if (size > 2 * 1024 * 1024) {
         const r = await ipcRenderer.invoke('show-message-box', {
           type: 'warning',

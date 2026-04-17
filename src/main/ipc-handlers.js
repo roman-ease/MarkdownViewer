@@ -161,6 +161,16 @@ function registerIpcHandlers(mainWindow, sessionManager, fileWatcher) {
     }
   });
 
+  // ─── ファイル stat ──────────────────────────────────────────────
+  ipcMain.handle('stat-file', async (event, filePath) => {
+    try {
+      const stats = fs.statSync(filePath);
+      return { success: true, size: stats.size };
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  });
+
   // ─── ファイル存在確認 ───────────────────────────────────────────
   ipcMain.handle('file-exists', async (event, filePath) => {
     try {

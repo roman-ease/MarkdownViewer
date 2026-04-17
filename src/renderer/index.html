@@ -94,6 +94,8 @@
         <div class="dropdown-item" data-theme="dark">Dark</div>
         <div class="dropdown-item" data-theme="light">Light</div>
         <div class="dropdown-item" data-theme="sepia">Sepia</div>
+        <div class="dropdown-item" data-theme="vaporwave">Vaporwave</div>
+        <div class="dropdown-item" data-theme="neon">ネオン</div>
       </div>
 
       <!-- 設定 -->
@@ -206,6 +208,8 @@
                   <option value="dark">Dark</option>
                   <option value="light">Light</option>
                   <option value="sepia">Sepia</option>
+                  <option value="vaporwave">Vaporwave</option>
+                  <option value="neon">ネオン</option>
                 </select>
               </label>
               <label>エディタフォントサイズ (px)
@@ -367,11 +371,8 @@
     </div>
   </div>
 
-  <!-- ─── グローバル設定 (重複宣言を防ぐため最初に1回だけ設定) ─── -->
+  <!-- ─── グローバル設定 ─── -->
   <script>
-    // Node.js モジュールをウィンドウグローバルに設定
-    // renderer の <script> タグはグローバルスコープを共有するため
-    // 各ファイルで const 宣言すると "already declared" エラーになる
     window.ipcRenderer = require('electron').ipcRenderer;
     window.nodePath    = require('path');
     window.nodeFs      = require('fs');
