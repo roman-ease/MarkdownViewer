@@ -188,25 +188,41 @@ const Preview = (() => {
       _currentMermaidTheme = wantedTheme;
     }
 
+    // render() が body に直接挿入した一時要素を除去してからレンダリング開始
+    _purgeMermaidOrphans();
+
     for (const node of nodes) {
       const code = node.textContent;
       try {
         const id = `mermaid-${Date.now()}-${Math.random().toString(36).slice(2)}`;
-        // parseError コールバックで構文エラーを検知 (v11はthrowせずにエラーSVGを返す場合がある)
         let _parseError = null;
         _mermaidModule.parseError = (err) => { _parseError = err; };
         const { svg } = await _mermaidModule.render(id, code);
-        if (_parseError) {
-          // 構文エラー: エラーSVGを表示せず元のテキストを維持
+        // render() 後に残った一時要素をその都度除去
+        _purgeMermaidOrphans();
+        if (_parseError || _mermaidSvgHasError(svg)) {
           node.textContent = code;
         } else {
           node.innerHTML = svg;
         }
       } catch {
-        // 入力途中の不完全な構文は黙って無視し元のテキストを維持
+        _purgeMermaidOrphans();
         node.textContent = code;
       }
     }
+  }
+
+  // Mermaid が render() 中に body へ直接挿入する一時要素を除去する
+  // エラー時はこれらが残留して画面下部に表示されてしまうため、毎レンダリング時に掃除する
+  function _purgeMermaidOrphans() {
+    document.querySelectorAll('[id^="mermaid-"]').forEach(el => {
+      if (!el.closest('#preview-content')) el.remove();
+    });
+  }
+
+  function _mermaidSvgHasError(svg) {
+    if (typeof svg !== 'string') return false;
+    return svg.includes('Syntax error') || svg.includes('syntax-error') || svg.includes('error-icon');
   }
 
   // ─── KaTeX ───────────────────────────────────────────────────────────────
