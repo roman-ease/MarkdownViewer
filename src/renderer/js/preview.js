@@ -24,7 +24,7 @@ const Preview = (() => {
   let _currentMermaidTheme = null;
 
   // アプリテーマ → Mermaid テーマのマッピング
-  const _MERMAID_THEME_MAP = { dark: 'dark', light: 'default', sepia: 'neutral', vaporwave: 'dark', neon: 'dark' };
+  const _MERMAID_THEME_MAP = { dark: 'dark', light: 'default', sepia: 'neutral', vaporwave: 'dark', terminal: 'dark' };
 
   function _resolveMermaidTheme() {
     const setting = Settings.get('mermaidTheme');
@@ -232,7 +232,8 @@ const Preview = (() => {
           const link = document.createElement('link');
           link.id = 'katex-css';
           link.rel = 'stylesheet';
-          link.href = '../../node_modules/katex/dist/katex.min.css';
+          const katexCssPath = require('path').join(__dirname, '../../../node_modules/katex/dist/katex.min.css');
+          link.href = 'file:///' + katexCssPath.replace(/\\/g, '/');
           document.head.appendChild(link);
         }
         _katexLoaded = true;
@@ -284,7 +285,7 @@ const Preview = (() => {
 
     let result = content;
     for (const { full, replacement } of replacements) {
-      result = result.replace(full, replacement);
+      result = result.replaceAll(full, replacement);
     }
     return result;
   }

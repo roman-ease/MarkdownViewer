@@ -148,8 +148,8 @@ function extractFilePaths(argv) {
   for (let i = 1; i < argv.length; i++) {
     const arg = argv[i];
     if (arg.startsWith('--') || arg.startsWith('-')) continue;
-    // Electron の内部パス等を除外
-    if (arg.endsWith('.asar') || arg.endsWith('main.js')) continue;
+    // .asar パッケージ内パスを除外 (Electron 内部パス)
+    if (arg.includes('.asar')) continue;
     try {
       const resolved = path.resolve(arg);
       if (fs.statSync(resolved).isFile()) {
@@ -163,6 +163,7 @@ function extractFilePaths(argv) {
 }
 
 // レンダラーからの終了許可を受け取る
+
 ipcMain.on('confirm-close', () => {
   if (mainWindow) {
     mainWindow.destroy();

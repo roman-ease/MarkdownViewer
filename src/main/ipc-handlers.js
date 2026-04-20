@@ -273,8 +273,11 @@ function registerIpcHandlers(mainWindow, sessionManager, fileWatcher) {
       return { success: false, canceled: true };
     }
 
+    // data URI は大容量 HTML でクラッシュするため一時ファイル経由でロード
+    const tmpPath = path.join(app.getPath('temp'), `quill-pdf-${Date.now()}.html`);
     try {
-      await pdfWin.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(htmlContent)}`);
+      fs.writeFileSync(tmpPath, htmlContent, 'utf8');
+      await pdfWin.loadFile(tmpPath);
       const pdfData = await pdfWin.webContents.printToPDF({
         printBackground: true,
         pageSize: 'A4',
@@ -285,6 +288,8 @@ function registerIpcHandlers(mainWindow, sessionManager, fileWatcher) {
     } catch (err) {
       pdfWin.destroy();
       return { success: false, error: err.message };
+    } finally {
+      try { fs.unlinkSync(tmpPath); } catch { /* 一時ファイル削除失敗は無視 */ }
     }
   });
 }

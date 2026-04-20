@@ -231,11 +231,33 @@ const Toolbar = (() => {
 
   // ─── 画像挿入ダイアログ ──────────────────────────────────────────────────
   function _insertImageDialog() {
-    // シンプルな prompt ダイアログ (将来はネイティブに変更可能)
-    const src = prompt('画像パスまたは URL:');
-    if (src !== null) {
-      Editor.insertImage('image', src);
-    }
+    const dlg = document.getElementById('image-dialog');
+    const input = document.getElementById('image-src-input');
+    input.value = '';
+    dlg.classList.remove('hidden');
+    setTimeout(() => input.focus(), 50);
+  }
+
+  function _initImageDialog() {
+    const dlg = document.getElementById('image-dialog');
+    const insertBtn = document.getElementById('image-insert-btn');
+    const cancelBtn = document.getElementById('image-cancel-btn');
+    const input = document.getElementById('image-src-input');
+
+    const doInsert = () => {
+      const src = input.value.trim();
+      if (src) Editor.insertImage('image', src);
+      dlg.classList.add('hidden');
+    };
+    const doCancel = () => dlg.classList.add('hidden');
+
+    insertBtn.addEventListener('click', doInsert);
+    cancelBtn.addEventListener('click', doCancel);
+    dlg.addEventListener('click', (e) => { if (e.target === dlg) doCancel(); });
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') doInsert();
+      if (e.key === 'Escape') doCancel();
+    });
   }
 
   // ─── 最近使ったファイルメニュー ─────────────────────────────────────────
@@ -328,6 +350,7 @@ const Toolbar = (() => {
 
   function initAfterDOM() {
     _initTableDialog();
+    _initImageDialog();
     Settings.initDialogEvents();
   }
 

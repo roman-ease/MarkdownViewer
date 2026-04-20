@@ -58,7 +58,6 @@ const App = (() => {
     // 自動保存
     _resetAutoSave();
 
-    console.log('Quill initialized');
   }
 
   // ─── ファイル操作 ────────────────────────────────────────────────────────
@@ -370,7 +369,6 @@ const App = (() => {
     document.addEventListener('drop', (e) => {
       e.preventDefault();
       const files = Array.from(e.dataTransfer.files)
-        .filter(f => /\.(md|markdown|txt)$/i.test(f.name) || true)
         .map(f => f.path);
       if (files.length > 0) openFilePaths(files);
     });

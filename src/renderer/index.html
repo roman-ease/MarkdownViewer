@@ -95,7 +95,7 @@
         <div class="dropdown-item" data-theme="light">Light</div>
         <div class="dropdown-item" data-theme="sepia">Sepia</div>
         <div class="dropdown-item" data-theme="vaporwave">Vaporwave</div>
-        <div class="dropdown-item" data-theme="neon">ネオン</div>
+        <div class="dropdown-item" data-theme="terminal">Terminal</div>
       </div>
 
       <!-- 設定 -->
@@ -209,7 +209,7 @@
                   <option value="light">Light</option>
                   <option value="sepia">Sepia</option>
                   <option value="vaporwave">Vaporwave</option>
-                  <option value="neon">ネオン</option>
+                  <option value="terminal">Terminal</option>
                 </select>
               </label>
               <label>エディタフォントサイズ (px)
@@ -398,6 +398,22 @@
       </div>
       <div class="modal-actions">
         <button id="shortcut-help-close-btn" class="btn-primary">閉じる</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 画像挿入ダイアログ -->
+  <div id="image-dialog" class="modal-overlay hidden">
+    <div class="modal">
+      <h3>画像を挿入</h3>
+      <div class="modal-row" style="flex-direction:column;gap:6px;">
+        <label style="width:100%">パスまたは URL
+          <input type="text" id="image-src-input" placeholder="例: ./images/photo.png または https://..." style="width:100%;margin-top:4px;">
+        </label>
+      </div>
+      <div class="modal-actions">
+        <button id="image-insert-btn" class="btn-primary">挿入</button>
+        <button id="image-cancel-btn">キャンセル</button>
       </div>
     </div>
   </div>

@@ -193,10 +193,10 @@ function buildMenu(mainWindow, sessionManager) {
               click: () => send('set-theme', 'vaporwave'),
             },
             {
-              label: 'ネオン',
+              label: 'Terminal',
               type: 'radio',
-              id: 'theme-neon',
-              click: () => send('set-theme', 'neon'),
+              id: 'theme-terminal',
+              click: () => send('set-theme', 'terminal'),
             },
           ],
         },
