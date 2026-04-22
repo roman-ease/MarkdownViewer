@@ -167,7 +167,7 @@ npm run dev
 npm run build
 ```
 
-`dist/Quill Setup 1.1.0.exe` にインストーラーが生成されます。
+`dist/Quill Setup 1.1.1.exe` にインストーラーが生成されます。
 
 ---
 
@@ -186,6 +186,17 @@ npm run build
 ---
 
 ## バージョン履歴
+
+### v1.1.1 — 2026-04-22
+**セキュリティ改善**
+- `nodeIntegration: false` + `contextIsolation: true` に移行し、レンダラープロセスから Node.js への直接アクセスを遮断
+  - `src/preload.js` を新設し、`contextBridge` 経由でホワイトリスト管理された IPC・API のみ公開
+  - marked / DOMPurify / KaTeX をブラウザ UMD ビルドに切り替え
+  - highlight.js は preload 経由で安全に公開
+
+**バグ修正**
+- クリップボードから画像を貼り付けた際、MIME タイプの解析が不正確で拡張子なしファイルが生成される問題を修正
+- 未保存ファイルに貼り付けた絶対パス画像がプレビューに表示されない問題を修正
 
 ### v1.1.0 — 2026-04-22
 **新機能**

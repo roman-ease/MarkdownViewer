@@ -1,11 +1,5 @@
 'use strict';
-/* global ipcRenderer, nodePath, document, Settings, Notifications, Tabs */
-
-const { marked } = require('marked');
-const hljs = require('highlight.js');
-const createDOMPurify = require('dompurify');
-
-const DOMPurify = createDOMPurify(window);
+/* global ipcRenderer, nodePath, hljs, marked, DOMPurify, document, Settings, Notifications, Tabs */
 
 // DOMPurify: file:// src の画像を許可
 DOMPurify.addHook('afterSanitizeAttributes', (node) => {
@@ -110,10 +104,7 @@ const Preview = (() => {
     }
 
     // 画像パスの解決: 相対パスを file:// に変換
-    let processedContent = content;
-    if (filePath) {
-      processedContent = await resolveImagePaths(content, filePath);
-    }
+    let processedContent = await resolveImagePaths(content, filePath);
 
     // KaTeX 前処理
     if (Settings.get('katexEnabled')) {
@@ -257,21 +248,9 @@ const Preview = (() => {
 
   async function renderKaTeX(container) {
     if (!_katexLoaded) {
-      try {
-        _katexModule = require('katex');
-        // KaTeX CSS
-        if (!document.getElementById('katex-css')) {
-          const link = document.createElement('link');
-          link.id = 'katex-css';
-          link.rel = 'stylesheet';
-          const katexCssPath = require.resolve('katex/dist/katex.min.css');
-          link.href = 'file:///' + katexCssPath.replace(/\\/g, '/');
-          document.head.appendChild(link);
-        }
-        _katexLoaded = true;
-      } catch {
-        return;
-      }
+      if (!window.katex) return;
+      _katexModule = window.katex;
+      _katexLoaded = true;
     }
 
     container.querySelectorAll('.math-block').forEach(el => {
@@ -293,7 +272,7 @@ const Preview = (() => {
   // ─── Image Path Resolution ───────────────────────────────────────────────
 
   async function resolveImagePaths(content, filePath) {
-    const dir = nodePath.dirname(filePath);
+    const dir = filePath ? nodePath.dirname(filePath) : null;
     // ![alt](./relative/path.png) パターン
     const imgRegex = /!\[([^\]]*)\]\(([^)]+)\)/g;
     const replacements = [];
@@ -305,7 +284,8 @@ const Preview = (() => {
           src.startsWith('data:') || src.startsWith('file://')) {
         continue;
       }
-      // 相対または絶対パス
+      // 相対パスは dir が必要、絶対パスはそのまま使える
+      if (!nodePath.isAbsolute(src) && !dir) continue;
       const absPath = nodePath.isAbsolute(src) ? src : nodePath.join(dir, src);
       try {
         const base64 = await ipcRenderer.invoke('read-image-base64', absPath);

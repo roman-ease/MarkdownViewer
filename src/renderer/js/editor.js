@@ -358,7 +358,7 @@ const Editor = (() => {
           }
 
           await ipcRenderer.invoke('ensure-dir', saveDir);
-          const ext = item.type.replace('image/', '').replace('jpeg', 'jpg');
+          const ext = ((item.type.split('/')[1] || '').replace('jpeg', 'jpg').replace(/[^a-z0-9]/g, '')) || 'png';
           const fileName = `image-${Date.now()}.${ext}`;
           const destPath = saveDir + '/' + fileName;
           await ipcRenderer.invoke('save-image', destPath, base64);

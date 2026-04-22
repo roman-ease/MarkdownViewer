@@ -72,10 +72,8 @@ const ExportManager = (() => {
     // PDF は常に白背景なので hljs も明色テーマ固定
     let hljsCss = '';
     try {
-      const fs = require('fs');
-      const path = require('path');
-      const hljsPath = path.join(__dirname, '../../../node_modules/highlight.js/styles/github.min.css');
-      hljsCss = fs.readFileSync(hljsPath, 'utf8');
+      const res = await fetch('../../node_modules/highlight.js/styles/github.min.css');
+      hljsCss = await res.text();
     } catch { /* ignore */ }
 
     const html = `<!DOCTYPE html>
