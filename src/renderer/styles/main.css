@@ -134,6 +134,8 @@ body {
 }
 .dropdown-item:hover { background: var(--bg-hover); }
 .dropdown-item.active { color: var(--text-accent); font-weight: 500; }
+.dropdown-item.disabled { opacity: 0.4; cursor: default; pointer-events: none; }
+#tab-context-menu { width: max-content; min-width: 180px; max-width: 280px; }
 .dropdown-separator { height: 1px; background: var(--border-color); margin: 4px 0; }
 .hidden { display: none !important; }
 

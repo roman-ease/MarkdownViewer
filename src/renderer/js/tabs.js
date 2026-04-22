@@ -165,6 +165,92 @@ const Tabs = (() => {
     return true;
   }
 
+  // ─── タブ一括クローズ ────────────────────────────────────────────────────
+  async function _closeTabsBatch(tabIds) {
+    const toClose = tabIds.map(id => getTab(id)).filter(Boolean);
+    const dirty = toClose.filter(t => t.isDirty);
+    if (dirty.length > 0) {
+      const names = dirty.map(t => t.title).join('\n');
+      const result = await ipcRenderer.invoke('show-message-box', {
+        type: 'question',
+        title: '未保存の変更',
+        message: `以下のファイルに未保存の変更があります:\n${names}\n\n保存しますか?`,
+        buttons: ['すべて保存', '保存しない', 'キャンセル'],
+        defaultId: 0,
+        cancelId: 2,
+      });
+      if (result.response === 2) return false;
+      if (result.response === 0) {
+        for (const tab of dirty) await window.App.saveTab(tab.id);
+      }
+    }
+    for (const id of [...tabIds]) await closeTab(id, true);
+    return true;
+  }
+
+  async function _closeTabsToRight(tabId) {
+    const idx = _tabs.findIndex(t => t.id === tabId);
+    await _closeTabsBatch(_tabs.slice(idx + 1).map(t => t.id));
+  }
+
+  async function _closeTabsToLeft(tabId) {
+    const idx = _tabs.findIndex(t => t.id === tabId);
+    await _closeTabsBatch(_tabs.slice(0, idx).map(t => t.id));
+  }
+
+  async function _closeOtherTabs(tabId) {
+    await _closeTabsBatch(_tabs.filter(t => t.id !== tabId).map(t => t.id));
+  }
+
+  async function _closeAllTabsMenu() {
+    await _closeTabsBatch(_tabs.map(t => t.id));
+  }
+
+  // ─── タブ右クリックメニュー ──────────────────────────────────────────────
+  function _showTabContextMenu(tabId, x, y) {
+    const prev = document.getElementById('tab-context-menu');
+    if (prev) prev.remove();
+
+    const idx = _tabs.findIndex(t => t.id === tabId);
+    const hasRight = idx < _tabs.length - 1;
+    const hasLeft  = idx > 0;
+    const hasOther = _tabs.length > 1;
+
+    const menu = document.createElement('div');
+    menu.id = 'tab-context-menu';
+    menu.className = 'dropdown-menu';
+    menu.style.cssText = `position:fixed; left:${x}px; top:${y}px; z-index:9999;`;
+
+    const item = (label, action, disabled = false) => {
+      const el = document.createElement('div');
+      el.className = 'dropdown-item' + (disabled ? ' disabled' : '');
+      el.textContent = label;
+      if (!disabled) el.addEventListener('click', () => { menu.remove(); action(); });
+      return el;
+    };
+    const sep = () => { const el = document.createElement('div'); el.className = 'dropdown-separator'; return el; };
+
+    menu.append(
+      item('このタブを閉じる',           () => closeTab(tabId)),
+      sep(),
+      item('右のタブをすべて閉じる',     () => _closeTabsToRight(tabId), !hasRight),
+      item('左のタブをすべて閉じる',     () => _closeTabsToLeft(tabId),  !hasLeft),
+      sep(),
+      item('他のタブをすべて閉じる',     () => _closeOtherTabs(tabId),   !hasOther),
+      item('すべてのタブを閉じる',       () => _closeAllTabsMenu()),
+    );
+
+    document.body.appendChild(menu);
+
+    // 画面端補正
+    const rect = menu.getBoundingClientRect();
+    if (rect.right > window.innerWidth)  menu.style.left = (x - rect.width) + 'px';
+    if (rect.bottom > window.innerHeight) menu.style.top = (y - rect.height) + 'px';
+
+    const close = (e) => { if (!menu.contains(e.target)) { menu.remove(); document.removeEventListener('click', close, true); } };
+    setTimeout(() => document.addEventListener('click', close, true), 0);
+  }
+
   // ─── タブ並び替え ────────────────────────────────────────────────────────
   function _initDragSort() {
     tabList().addEventListener('dragstart', (e) => {
@@ -217,6 +303,11 @@ const Tabs = (() => {
     el.querySelector('.tab-close').addEventListener('click', (e) => {
       e.stopPropagation();
       closeTab(tab.id);
+    });
+    el.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+      activateTab(tab.id);
+      _showTabContextMenu(tab.id, e.clientX, e.clientY);
     });
     tabList().appendChild(el);
   }
