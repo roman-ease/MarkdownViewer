@@ -91,7 +91,7 @@
   --resizer-hover:    #c8a96b;
 }
 
-[data-theme="light"] {
+[data-theme="default"] {
   /* Backgrounds — Sebastian classic: 羊皮紙と書斎 */
   --bg-base:        #ece6d4;
   --bg-surface:     #f5f0e5;
@@ -179,6 +179,96 @@
   --search-current:   rgba(160,124,48,0.45);
   --resizer-bg:       #d5c9a8;
   --resizer-hover:    #c9a456;
+}
+
+[data-theme="light"] {
+  /* Backgrounds — Pure White / Clean (PDF エクスポートと同等の白基調) */
+  --bg-base:        #ffffff;
+  --bg-surface:     #f8f8f8;
+  --bg-elevated:    #f0f0f0;
+  --bg-hover:       #e8e8e8;
+  --bg-active:      #e0e0e0;
+  --bg-selection:   #c8dcf8;
+
+  /* Text */
+  --text-primary:   #1a1a1a;
+  --text-secondary: #555555;
+  --text-muted:     #888888;
+  --text-accent:    #1a5fa8;
+
+  /* Borders */
+  --border-color:   #d0d0d0;
+  --border-focus:   #1a5fa8;
+
+  /* Tabs */
+  --tab-bg:             #f0f0f0;
+  --tab-active-bg:      #ffffff;
+  --tab-active-border:  #1a5fa8;
+  --tab-unsaved:        #e67e22;
+
+  /* Chrome */
+  --toolbar-bg:           #f8f8f8;
+  --toolbar-text:         #333333;
+  --toolbar-text-muted:   #888888;
+  --toolbar-hover-bg:     #e8e8e8;
+  --toolbar-active-bg:    #e0e0e0;
+  --toolbar-border:       #d0d0d0;
+  --statusbar-bg:         #f0f0f0;
+  --statusbar-text:       #555555;
+
+  /* Scrollbar */
+  --scrollbar-thumb: #c0c0c0;
+  --scrollbar-track: transparent;
+
+  /* Modal */
+  --modal-bg:      #ffffff;
+  --modal-overlay: rgba(0,0,0,0.3);
+
+  /* Toasts */
+  --toast-success-bg:     rgba(240,255,242,0.98);
+  --toast-success-border: #4e8c5a;
+  --toast-warning-bg:     rgba(255,250,235,0.98);
+  --toast-warning-border: #e67e22;
+  --toast-error-bg:       rgba(255,240,238,0.98);
+  --toast-error-border:   #c0392b;
+  --toast-info-bg:        rgba(230,238,255,0.98);
+  --toast-info-border:    #1a5fa8;
+
+  /* Preview */
+  --preview-bg:                #ffffff;
+  --preview-text:              #1a1a1a;
+  --preview-code-bg:           #f5f5f5;
+  --preview-border:            #d0d0d0;
+  --preview-link:              #1a5fa8;
+  --preview-blockquote-border: #b0b0b0;
+  --preview-blockquote-bg:     #f9f9f9;
+  --preview-table-header:      #eeeeee;
+  --preview-table-border:      #cccccc;
+  --preview-table-stripe:      #f5f5f5;
+
+  /* Editor */
+  --editor-bg:           #ffffff;
+  --editor-text:         #1a1a1a;
+  --editor-gutter:       #f5f5f5;
+  --editor-line-active:  #f0f7ff;
+  --editor-cursor:       #1a1a1a;
+
+  /* Syntax — GitHub Light スタイル */
+  --cm-keyword:    #d73a49;
+  --cm-string:     #032f62;
+  --cm-comment:    #6a737d;
+  --cm-number:     #005cc5;
+  --cm-operator:   #d73a49;
+  --cm-tag:        #22863a;
+  --cm-attribute:  #6f42c1;
+  --cm-link:       #1a5fa8;
+  --cm-header:     #1a1a1a;
+  --cm-hr:         #d0d0d0;
+
+  --search-highlight: rgba(26,95,168,0.15);
+  --search-current:   rgba(26,95,168,0.35);
+  --resizer-bg:       #d0d0d0;
+  --resizer-hover:    #1a5fa8;
 }
 
 [data-theme="sepia"] {

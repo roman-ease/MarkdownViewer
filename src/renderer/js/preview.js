@@ -24,7 +24,7 @@ const Preview = (() => {
   let _currentMermaidTheme = null;
 
   // アプリテーマ → Mermaid テーマのマッピング
-  const _MERMAID_THEME_MAP = { dark: 'dark', light: 'default', sepia: 'neutral', vaporwave: 'dark', terminal: 'dark' };
+  const _MERMAID_THEME_MAP = { dark: 'dark', default: 'default', light: 'default', sepia: 'neutral', vaporwave: 'dark', terminal: 'dark' };
 
   function _resolveMermaidTheme() {
     const setting = Settings.get('mermaidTheme');
@@ -35,6 +35,10 @@ const Preview = (() => {
   let _katexModule = null;
   let _renderTimer = null;
   const DEBOUNCE_MS = 250;
+
+  // marked の renderer.code → renderMermaid へ生コードを受け渡す一時ストア
+  // HTML パイプライン (DOMPurify, innerHTML) を経由せずに済む
+  let _mermaidRawCodes = [];
 
   // marked の設定
   marked.setOptions({
@@ -55,7 +59,8 @@ const Preview = (() => {
   // コードブロック: hljs ハイライト + コピーボタン + Mermaid 判定
   renderer.code = function(code, language) {
     if (language === 'mermaid') {
-      return `<div class="mermaid">${escapeHtml(code)}</div>\n`;
+      const idx = _mermaidRawCodes.push(code) - 1;
+      return `<div class="mermaid" data-mermaid-idx="${idx}"></div>\n`;
     }
 
     let highlighted = '';
@@ -115,12 +120,13 @@ const Preview = (() => {
       processedContent = preprocessKaTeX(processedContent);
     }
 
-    // Markdown → HTML
+    // Markdown → HTML (mermaid 生コードをリセットしてから parse)
+    _mermaidRawCodes = [];
     let html = marked.parse(processedContent);
 
     // XSS サニタイズ
     html = DOMPurify.sanitize(html, {
-      ADD_ATTR: ['data-external', 'data-lightbox', 'data-code'],
+      ADD_ATTR: ['data-external', 'data-lightbox', 'data-code', 'data-mermaid-idx'],
       ADD_TAGS: ['math', 'maction', 'semantics', 'mrow', 'msup', 'msub', 'msubsup',
                   'munder', 'mover', 'munderover', 'mfrac', 'msqrt', 'mroot',
                   'mi', 'mn', 'mo', 'mtext', 'mspace', 'menclose', 'mtable',
@@ -152,6 +158,9 @@ const Preview = (() => {
 
     // タスクリスト チェックボックス
     attachTaskListeners(container);
+
+    // アウトラインに更新を通知
+    window.dispatchEvent(new CustomEvent('preview-rendered'));
   }
 
   // ─── Mermaid ─────────────────────────────────────────────────────────────
@@ -192,7 +201,10 @@ const Preview = (() => {
     _purgeMermaidOrphans();
 
     for (const node of nodes) {
-      const code = node.textContent;
+      const idx = parseInt(node.dataset.mermaidIdx, 10);
+      const code = (!isNaN(idx) && _mermaidRawCodes[idx] !== undefined)
+        ? _mermaidRawCodes[idx]
+        : node.textContent;
       try {
         const id = `mermaid-${Date.now()}-${Math.random().toString(36).slice(2)}`;
         let _parseError = null;
@@ -205,7 +217,7 @@ const Preview = (() => {
         } else {
           node.innerHTML = svg;
         }
-      } catch {
+      } catch (err) {
         _purgeMermaidOrphans();
         node.textContent = code;
       }
@@ -215,14 +227,18 @@ const Preview = (() => {
   // Mermaid が render() 中に body へ直接挿入する一時要素を除去する
   // エラー時はこれらが残留して画面下部に表示されてしまうため、毎レンダリング時に掃除する
   function _purgeMermaidOrphans() {
+    // レンダリング生成IDのパターン: mermaid-{数字}-{英数字} のみ対象
     document.querySelectorAll('[id^="mermaid-"]').forEach(el => {
-      if (!el.closest('#preview-content')) el.remove();
+      if (/^mermaid-\d+-\w+$/.test(el.id) && !el.closest('#preview-content')) el.remove();
     });
   }
 
   function _mermaidSvgHasError(svg) {
     if (typeof svg !== 'string') return false;
-    return svg.includes('Syntax error') || svg.includes('syntax-error') || svg.includes('error-icon');
+    // CSS クラス定義 (.error-icon{}) と要素属性 (class="error-icon") を区別する
+    return svg.includes('Syntax error')
+      || svg.includes('class="syntax-error"')
+      || svg.includes('class="error-icon"');
   }
 
   // ─── KaTeX ───────────────────────────────────────────────────────────────
@@ -248,7 +264,7 @@ const Preview = (() => {
           const link = document.createElement('link');
           link.id = 'katex-css';
           link.rel = 'stylesheet';
-          const katexCssPath = require('path').join(__dirname, '../../../node_modules/katex/dist/katex.min.css');
+          const katexCssPath = require.resolve('katex/dist/katex.min.css');
           link.href = 'file:///' + katexCssPath.replace(/\\/g, '/');
           document.head.appendChild(link);
         }

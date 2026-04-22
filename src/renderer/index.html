@@ -50,16 +50,21 @@
       <!-- 挿入 -->
       <button class="tb-btn" data-action="insert-table" title="テーブル挿入 (Ctrl+Shift+T)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="1.5" width="13" height="13" rx="1"/><path d="M1.5 6h13M6 6v9M6 1.5v4.5"/></svg></button>
       <button class="tb-btn" data-action="insert-toc" title="目次生成 (Ctrl+Shift+C)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 4.5h12M2 8h8M2 11.5h10"/></svg></button>
-      <div class="tb-dropdown-wrap">
-        <button class="tb-btn" id="mermaid-btn" title="Mermaid テンプレート"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="1" width="8" height="4" rx="1"/><rect x="1" y="11" width="5" height="4" rx="1"/><rect x="10" y="11" width="5" height="4" rx="1"/><path d="M8 5v2.5M8 7.5L3.5 11M8 7.5L12.5 11"/></svg></button>
-        <div id="mermaid-menu" class="dropdown-menu hidden">
+      <button class="tb-btn" id="mermaid-btn" data-action="mermaid-menu" title="Mermaid テンプレート"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="1" width="8" height="4" rx="1"/><rect x="1" y="11" width="5" height="4" rx="1"/><rect x="10" y="11" width="5" height="4" rx="1"/><path d="M8 5v2.5M8 7.5L3.5 11M8 7.5L12.5 11"/></svg></button>
+      <div id="mermaid-menu" class="dropdown-menu hidden" style="position:fixed;">
           <div class="dropdown-item" data-mermaid="flowchart">フローチャート</div>
           <div class="dropdown-item" data-mermaid="sequence">シーケンス図</div>
           <div class="dropdown-item" data-mermaid="class">クラス図</div>
           <div class="dropdown-item" data-mermaid="er">ER 図</div>
           <div class="dropdown-item" data-mermaid="state">状態遷移図</div>
           <div class="dropdown-item" data-mermaid="gantt">ガントチャート</div>
-        </div>
+          <div class="dropdown-separator"></div>
+          <div class="dropdown-item" data-mermaid="pie">パイチャート</div>
+          <div class="dropdown-item" data-mermaid="mindmap">マインドマップ</div>
+          <div class="dropdown-item" data-mermaid="timeline">タイムライン</div>
+          <div class="dropdown-item" data-mermaid="xychart">XY チャート</div>
+          <div class="dropdown-item" data-mermaid="git">Git グラフ</div>
+          <div class="dropdown-item" data-mermaid="journey">ユーザージャーニー</div>
       </div>
       <div class="tb-separator"></div>
 
@@ -79,6 +84,9 @@
       <!-- ビューモード -->
       <button class="tb-btn active" id="view-split-btn" data-action="view-split" title="分割ビュー"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="2" width="6" height="12" rx="1"/><rect x="9" y="2" width="6" height="12" rx="1"/></svg></button>
       <button class="tb-btn" id="view-preview-btn" data-action="view-preview" title="プレビューのみ"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 8s2.5-5 7-5 7 5 7 5-2.5 5-7 5-7-5-7-5z"/><circle cx="8" cy="8" r="2"/></svg></button>
+
+      <!-- アウトライン -->
+      <button class="tb-btn" id="outline-btn" data-action="outline" title="アウトライン (Ctrl+Shift+O)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="2" y1="4" x2="14" y2="4"/><line x1="4.5" y1="8" x2="14" y2="8"/><line x1="4.5" y1="12" x2="14" y2="12"/><circle cx="2.5" cy="8" r="0.8" fill="currentColor" stroke="none"/><circle cx="2.5" cy="12" r="0.8" fill="currentColor" stroke="none"/></svg></button>
       <div class="tb-separator"></div>
 
       <!-- 同期スクロール -->
@@ -91,8 +99,9 @@
       <!-- テーマ -->
       <button class="tb-btn" id="theme-btn" title="テーマ切替"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M8 2a6 6 0 000 12V2z" fill="currentColor" stroke="none"/></svg></button>
       <div id="theme-menu" class="dropdown-menu hidden">
-        <div class="dropdown-item" data-theme="dark">Dark</div>
+        <div class="dropdown-item" data-theme="default">Default</div>
         <div class="dropdown-item" data-theme="light">Light</div>
+        <div class="dropdown-item" data-theme="dark">Dark</div>
         <div class="dropdown-item" data-theme="sepia">Sepia</div>
         <div class="dropdown-item" data-theme="vaporwave">Vaporwave</div>
         <div class="dropdown-item" data-theme="terminal">Terminal</div>
@@ -206,8 +215,9 @@
             <div class="settings-group">
               <label>テーマ
                 <select id="s-theme">
-                  <option value="dark">Dark</option>
+                  <option value="default">Default</option>
                   <option value="light">Light</option>
+                  <option value="dark">Dark</option>
                   <option value="sepia">Sepia</option>
                   <option value="vaporwave">Vaporwave</option>
                   <option value="terminal">Terminal</option>
@@ -216,8 +226,9 @@
               <label>起動時のデフォルトテーマ
                 <select id="s-default-theme">
                   <option value="last">前回のテーマを引き継ぐ</option>
-                  <option value="dark">Dark</option>
+                  <option value="default">Default</option>
                   <option value="light">Light</option>
+                  <option value="dark">Dark</option>
                   <option value="sepia">Sepia</option>
                   <option value="vaporwave">Vaporwave</option>
                   <option value="terminal">Terminal</option>
@@ -370,6 +381,23 @@
     </div>
   </div>
 
+  <!-- アウトラインドロワー -->
+  <div id="outline-backdrop" class="hidden"></div>
+  <div id="outline-drawer">
+    <div class="outline-header">
+      <span>アウトライン</span>
+      <div class="outline-header-btns">
+        <button id="outline-pin-btn" title="ピン留め (常に表示)">
+          <svg viewBox="0 0 16 16" width="13" height="13" fill="currentColor">
+            <path d="M4.146.146A.5.5 0 0 1 4.5 0h7a.5.5 0 0 1 .5.5c0 .68-.342 1.174-.646 1.479-.126.125-.25.224-.354.298v4.431l.078.048c.203.127.476.314.751.555C12.36 7.775 13 8.527 13 9.5a.5.5 0 0 1-.5.5h-4v4.5c0 .276-.224 1.5-.5 1.5s-.5-1.224-.5-1.5V10h-4a.5.5 0 0 1-.5-.5c0-.973.64-1.725 1.17-2.189A5.921 5.921 0 0 1 5 6.708V2.277a2.77 2.77 0 0 1-.354-.298C4.342 1.674 4 1.179 4 .5a.5.5 0 0 1 .146-.354z"/>
+          </svg>
+        </button>
+        <button id="outline-close-btn" title="閉じる">✕</button>
+      </div>
+    </div>
+    <div id="outline-list"></div>
+  </div>
+
   <!-- ライトボックス -->
   <div id="lightbox" class="lightbox hidden">
     <div id="lightbox-backdrop"></div>
@@ -470,6 +498,7 @@
   <script src="js/toolbar.js"></script>
   <script src="js/statusbar.js"></script>
   <script src="js/export.js"></script>
+  <script src="js/outline.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

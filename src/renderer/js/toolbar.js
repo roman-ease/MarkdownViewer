@@ -23,6 +23,18 @@ const Toolbar = (() => {
       '\n```mermaid\nstateDiagram-v2\n    [*] --> 待機\n    待機 --> 処理中 : 開始\n    処理中 --> 完了 : 成功\n    処理中 --> エラー : 失敗\n    完了 --> [*]\n    エラー --> 待機 : リトライ\n```\n',
     gantt:
       '\n```mermaid\ngantt\n    title プロジェクト計画\n    dateFormat YYYY-MM-DD\n    section 設計\n        要件定義   :a1, 2024-01-01, 7d\n        設計書作成 :a2, after a1, 5d\n    section 開発\n        実装       :b1, after a2, 14d\n        テスト     :b2, after b1, 7d\n```\n',
+    pie:
+      '\n```mermaid\npie title 内訳\n    "項目A" : 40\n    "項目B" : 35\n    "項目C" : 25\n```\n',
+    mindmap:
+      '\n```mermaid\nmindmap\n  root((テーマ))\n    サブトピック1\n      詳細A\n      詳細B\n    サブトピック2\n      詳細C\n    サブトピック3\n```\n',
+    timeline:
+      '\n```mermaid\ntimeline\n    title 年表\n    section フェーズ1\n        2022 : イベントA\n             : イベントB\n    section フェーズ2\n        2023 : イベントC\n    section フェーズ3\n        2024 : イベントD\n             : イベントE\n```\n',
+    xychart:
+      '\n```mermaid\nxychart-beta\n    title "月次データ"\n    x-axis ["1月", "2月", "3月", "4月", "5月", "6月"]\n    y-axis "値" 0 --> 100\n    bar [30, 50, 45, 70, 65, 80]\n    line [30, 50, 45, 70, 65, 80]\n```\n',
+    git:
+      '\n```mermaid\ngitGraph\n    commit id: "初期コミット"\n    branch develop\n    checkout develop\n    commit id: "機能A"\n    commit id: "機能B"\n    checkout main\n    merge develop\n    commit id: "リリース v1.0"\n```\n',
+    journey:
+      '\n```mermaid\njourney\n    title ユーザージャーニー\n    section 探索\n        サイト訪問: 5: ユーザー\n        検索: 3: ユーザー\n    section 購入\n        カート追加: 4: ユーザー\n        決済: 2: ユーザー\n    section 完了\n        確認メール: 5: システム\n```\n',
   };
 
   // ─── Init ────────────────────────────────────────────────────────────────
@@ -31,7 +43,9 @@ const Toolbar = (() => {
     document.getElementById('toolbar').addEventListener('click', (e) => {
       const btn = e.target.closest('[data-action]');
       if (!btn) return;
-      _handleAction(btn.dataset.action);
+      const action = btn.dataset.action;
+      if (action === 'mermaid-menu') e.stopPropagation();
+      _handleAction(action);
     });
 
     // テーマドロップダウン
@@ -58,12 +72,7 @@ const Toolbar = (() => {
     });
 
     // Mermaid テンプレートドロップダウン
-    const mermaidBtn = document.getElementById('mermaid-btn');
     const mermaidMenu = document.getElementById('mermaid-menu');
-    mermaidBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      mermaidMenu.classList.toggle('hidden');
-    });
     mermaidMenu.addEventListener('click', (e) => {
       const item = e.target.closest('[data-mermaid]');
       if (!item) return;
@@ -115,11 +124,13 @@ const Toolbar = (() => {
       case 'hr':            Editor.insertText('\n---\n'); break;
       case 'insert-table':  _showTableDialog(); break;
       case 'insert-toc':    Editor.insertTOC(); break;
+      case 'mermaid-menu':  _toggleMermaidMenu(); break;
       case 'find':          Search.open(false); break;
       case 'view-split':    setViewMode('split'); break;
       case 'view-preview':  setViewMode('preview'); break;
       case 'toggle-sync-scroll': _toggleSyncScroll(); break;
       case 'toggle-focus-mode':  toggleFocusMode(); break;
+      case 'outline':       Outline.toggle(); break;
       case 'settings':      Settings.openDialog(); break;
     }
   }
@@ -202,6 +213,22 @@ const Toolbar = (() => {
       }
       _scrollTimer = setTimeout(() => { _scrollSource = null; }, 100);
     });
+  }
+
+  // ─── Mermaid メニュー ────────────────────────────────────────────────────
+  function _toggleMermaidMenu() {
+    const btn  = document.getElementById('mermaid-btn');
+    const menu = document.getElementById('mermaid-menu');
+    if (!menu.classList.contains('hidden')) {
+      menu.classList.add('hidden');
+      return;
+    }
+    // ボタンの画面座標を基点に fixed 配置
+    const rect = btn.getBoundingClientRect();
+    menu.style.top  = rect.bottom + 'px';
+    menu.style.left = rect.left + 'px';
+    menu.style.right = 'auto';
+    menu.classList.remove('hidden');
   }
 
   // ─── テーブルダイアログ ──────────────────────────────────────────────────
@@ -305,7 +332,10 @@ const Toolbar = (() => {
     ipcRenderer.on('menu-replace',     () => Search.open(true));
     ipcRenderer.on('menu-insert-table', () => _showTableDialog());
     ipcRenderer.on('menu-insert-toc',   () => Editor.insertTOC());
-    ipcRenderer.on('menu-insert-mermaid', () => Editor.insertMermaidTemplate());
+    ipcRenderer.on('menu-insert-mermaid', (_, type) => {
+      const tmpl = _MERMAID_TEMPLATES[type] || _MERMAID_TEMPLATES.flowchart;
+      Editor.insertText(tmpl);
+    });
     ipcRenderer.on('menu-export-html',  () => window.ExportManager.exportHtml());
     ipcRenderer.on('menu-export-pdf',   () => window.ExportManager.exportPdf());
     ipcRenderer.on('menu-settings',     () => Settings.openDialog());

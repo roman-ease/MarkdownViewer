@@ -28,6 +28,7 @@ const Settings = (() => {
     'next-tab':      'Ctrl+Tab',
     'prev-tab':      'Ctrl+Shift+Tab',
     'focus-mode':    'Ctrl+Shift+F',
+    'outline':       'Ctrl+Shift+O',
     'shortcut-help': 'F1',
   };
 
@@ -55,6 +56,7 @@ const Settings = (() => {
       { id: 'insert-toc',   label: '目次を生成' },
     ]},
     { group: '表示', actions: [
+      { id: 'outline',     label: 'アウトライン' },
       { id: 'focus-mode',  label: 'フォーカスモード' },
       { id: 'zoom-in',     label: 'ズームイン',      fixed: true, key: 'Ctrl+Plus' },
       { id: 'zoom-out',    label: 'ズームアウト',    fixed: true, key: 'Ctrl+Minus' },
@@ -66,7 +68,7 @@ const Settings = (() => {
   ];
 
   const DEFAULTS = {
-    theme: 'light',
+    theme: 'default',
     defaultTheme: 'last',
     editorFontSize: 14,
     previewFontSize: 15,
@@ -144,7 +146,7 @@ const Settings = (() => {
       'monokai': 'monokai',
     };
     // auto の場合はアプリテーマに応じて自動選択
-    const autoMap = { dark: 'atom-one-dark', light: 'github', sepia: 'github', vaporwave: 'atom-one-dark', terminal: 'vs2015' };
+    const autoMap = { dark: 'atom-one-dark', default: 'github', light: 'github', sepia: 'github', vaporwave: 'atom-one-dark', terminal: 'vs2015' };
     const syntaxSetting = _settings.syntaxTheme;
     const resolved = (!syntaxSetting || syntaxSetting === 'auto')
       ? autoMap[theme || 'dark'] || 'github-dark'

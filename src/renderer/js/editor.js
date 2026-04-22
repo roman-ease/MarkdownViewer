@@ -255,14 +255,6 @@ const Editor = (() => {
     _cm.focus();
   }
 
-  // Mermaid テンプレート
-  function insertMermaidTemplate() {
-    if (!_cm) return;
-    const template = '\n```mermaid\nflowchart TD\n    A[開始] --> B{条件}\n    B -->|はい| C[処理1]\n    B -->|いいえ| D[処理2]\n    C --> E[終了]\n    D --> E\n```\n';
-    _cm.replaceSelection(template);
-    _cm.focus();
-  }
-
   // タスクリスト トグル
   function toggleTaskItem(itemText, checked) {
     if (!_cm) return;
@@ -457,7 +449,6 @@ const Editor = (() => {
     insertAtLine,
     insertTable,
     insertTOC,
-    insertMermaidTemplate,
     toggleTaskItem,
     handleImagePaste,
     applySettings,

@@ -1,7 +1,7 @@
 'use strict';
 /* global ipcRenderer, nodePath, document, window,
    Notifications, Settings, Preview, Editor, Tabs,
-   Search, Toolbar, StatusBar, ExportManager */
+   Search, Toolbar, StatusBar, ExportManager, Outline */
 
 /**
  * App — アプリケーションのエントリポイントとファイル操作統合
@@ -21,6 +21,7 @@ const App = (() => {
     StatusBar.init();
     Toolbar.init();
     Toolbar.initAfterDOM();
+    Outline.init();
 
     // ライトボックス
     _initLightbox();
