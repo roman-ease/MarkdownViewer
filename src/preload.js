@@ -16,6 +16,7 @@ const INVOKE_CHANNELS = new Set([
   'print-to-pdf',
   'load-settings', 'save-settings',
   'load-session', 'save-session',
+  'get-templates', 'save-templates',
   'watch-file', 'unwatch-file',
   'set-always-on-top', 'set-zoom-factor',
   'get-app-version',

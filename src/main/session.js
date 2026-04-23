@@ -60,6 +60,8 @@ class SessionManager {
     this._recentFile = path.join(this._dataDir, 'recent-files.json');
     this._windowFile = path.join(this._dataDir, 'window-bounds.json');
 
+    this._templatesFile = path.join(this._dataDir, 'templates.json');
+
     this._settings = null;
   }
 
@@ -127,6 +129,20 @@ class SessionManager {
 
   clearRecentFiles() {
     this._writeJson(this._recentFile, []);
+  }
+
+  // ─── ユーザーテンプレート ────────────────────────────────────────
+  getTemplates() {
+    try {
+      const raw = fs.readFileSync(this._templatesFile, 'utf8');
+      return JSON.parse(raw);
+    } catch {
+      return [];
+    }
+  }
+
+  saveTemplates(templates) {
+    this._writeJson(this._templatesFile, templates);
   }
 
   // ─── ウィンドウサイズ ────────────────────────────────────────────

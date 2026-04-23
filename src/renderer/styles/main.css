@@ -107,6 +107,14 @@ body {
   margin: 0 5px;
   opacity: 0.6;
 }
+.tb-separator-major {
+  width: 2px;
+  height: 20px;
+  background: var(--toolbar-border, var(--border-color));
+  margin: 0 8px;
+  opacity: 0.9;
+  border-radius: 1px;
+}
 
 /* Mermaid menu: JS で fixed 配置するため position を上書き */
 #mermaid-menu {

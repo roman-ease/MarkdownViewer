@@ -181,11 +181,19 @@ const App = (() => {
     return saveTabAs(Tabs.getActiveTabId());
   }
 
+  function _defaultFileName(tabId) {
+    const firstLine = Editor.getValue(tabId).split('\n')[0]
+      .replace(/^#+\s*/, '')   // 見出し記号を除去
+      .replace(/\s*[\\/:*?"<>|]\s*/g, '-') // Windows 禁止文字を前後スペースごと除去
+      .trim();
+    return (firstLine || '新規ファイル') + '.md';
+  }
+
   async function saveTabAs(tabId) {
     const tab = Tabs.getTab(tabId);
     if (!tab) return false;
 
-    const result = await ipcRenderer.invoke('show-save-dialog', tab.filePath || tab.title + '.md');
+    const result = await ipcRenderer.invoke('show-save-dialog', tab.filePath || _defaultFileName(tabId));
     if (result.canceled) return false;
 
     let filePath = result.filePath;

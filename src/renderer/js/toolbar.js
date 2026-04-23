@@ -86,6 +86,7 @@ const Toolbar = (() => {
       themeMenu.classList.add('hidden');
       recentMenu.classList.add('hidden');
       mermaidMenu.classList.add('hidden');
+      document.getElementById('template-menu').classList.add('hidden');
     });
 
     // フォーカスモード: ホバーで一時表示
@@ -124,7 +125,8 @@ const Toolbar = (() => {
       case 'hr':            Editor.insertText('\n---\n'); break;
       case 'insert-table':  _showTableDialog(); break;
       case 'insert-toc':    Editor.insertTOC(); break;
-      case 'mermaid-menu':  _toggleMermaidMenu(); break;
+      case 'mermaid-menu':   _toggleMermaidMenu(); break;
+      case 'template-menu':  _toggleTemplateMenu(); break;
       case 'find':          Search.open(false); break;
       case 'view-split':    setViewMode('split'); break;
       case 'view-preview':  setViewMode('preview'); break;
@@ -229,6 +231,120 @@ const Toolbar = (() => {
     menu.style.left = rect.left + 'px';
     menu.style.right = 'auto';
     menu.classList.remove('hidden');
+  }
+
+  // ─── ユーザーテンプレート ────────────────────────────────────────────────
+  async function _toggleTemplateMenu() {
+    const btn  = document.getElementById('template-btn');
+    const menu = document.getElementById('template-menu');
+    if (!menu.classList.contains('hidden')) {
+      menu.classList.add('hidden');
+      return;
+    }
+    await _buildTemplateMenu();
+    const rect = btn.getBoundingClientRect();
+    menu.style.top   = rect.bottom + 'px';
+    menu.style.left  = rect.left + 'px';
+    menu.style.right = 'auto';
+    menu.classList.remove('hidden');
+  }
+
+  async function _buildTemplateMenu() {
+    const menu = document.getElementById('template-menu');
+    menu.innerHTML = '';
+    const templates = await ipcRenderer.invoke('get-templates');
+
+    if (templates.length === 0) {
+      const empty = document.createElement('div');
+      empty.className = 'dropdown-item';
+      empty.style.color = 'var(--text-muted)';
+      empty.textContent = '(テンプレートなし)';
+      menu.appendChild(empty);
+    } else {
+      templates.forEach((tmpl, idx) => {
+        const item = document.createElement('div');
+        item.className = 'dropdown-item';
+        item.style.cssText = 'display:flex;justify-content:space-between;align-items:center;gap:4px;padding-right:6px;';
+
+        const nameSpan = document.createElement('span');
+        nameSpan.textContent = tmpl.name;
+        nameSpan.style.cssText = 'flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer;';
+        nameSpan.addEventListener('click', (e) => {
+          e.stopPropagation();
+          Editor.insertText(tmpl.content);
+          menu.classList.add('hidden');
+        });
+
+        const delBtn = document.createElement('button');
+        delBtn.textContent = '✕';
+        delBtn.title = '削除';
+        delBtn.style.cssText = 'background:none;border:none;cursor:pointer;color:var(--text-muted);padding:0 2px;font-size:10px;flex-shrink:0;line-height:1;';
+        delBtn.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          const updated = templates.filter((_, i) => i !== idx);
+          await ipcRenderer.invoke('save-templates', updated);
+          await _buildTemplateMenu();
+        });
+
+        item.appendChild(nameSpan);
+        item.appendChild(delBtn);
+        menu.appendChild(item);
+      });
+    }
+
+    const sep = document.createElement('div');
+    sep.className = 'dropdown-separator';
+    menu.appendChild(sep);
+
+    const saveItem = document.createElement('div');
+    saveItem.className = 'dropdown-item';
+    saveItem.textContent = 'このタブをテンプレートとして保存…';
+    saveItem.addEventListener('click', (e) => {
+      e.stopPropagation();
+      menu.classList.add('hidden');
+      _showTemplateSaveDialog();
+    });
+    menu.appendChild(saveItem);
+  }
+
+  function _showTemplateSaveDialog() {
+    const dlg   = document.getElementById('template-save-dialog');
+    const input = document.getElementById('template-name-input');
+    input.value = '';
+    dlg.classList.remove('hidden');
+    setTimeout(() => input.focus(), 50);
+  }
+
+  function _initTemplateSaveDialog() {
+    const dlg       = document.getElementById('template-save-dialog');
+    const saveBtn   = document.getElementById('template-save-btn');
+    const cancelBtn = document.getElementById('template-save-cancel-btn');
+    const input     = document.getElementById('template-name-input');
+
+    const doSave = async () => {
+      const name = input.value.trim();
+      if (!name) return;
+      const content = Editor.getValue();
+      const templates = await ipcRenderer.invoke('get-templates');
+      const existingIdx = templates.findIndex(t => t.name === name);
+      if (existingIdx >= 0) {
+        templates[existingIdx] = { name, content };
+      } else {
+        templates.push({ name, content });
+      }
+      await ipcRenderer.invoke('save-templates', templates);
+      dlg.classList.add('hidden');
+      Notifications.show(`テンプレート「${name}」を保存しました`);
+    };
+    const doCancel = () => dlg.classList.add('hidden');
+
+    saveBtn.addEventListener('click', doSave);
+    cancelBtn.addEventListener('click', doCancel);
+    dlg.addEventListener('click', (e) => { if (e.target === dlg) doCancel(); });
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') doSave();
+      if (e.key === 'Escape') doCancel();
+    });
   }
 
   // ─── テーブルダイアログ ──────────────────────────────────────────────────
@@ -398,6 +514,7 @@ const Toolbar = (() => {
   function initAfterDOM() {
     _initTableDialog();
     _initImageDialog();
+    _initTemplateSaveDialog();
     Settings.initDialogEvents();
   }
 

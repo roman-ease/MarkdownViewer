@@ -225,6 +225,16 @@ function registerIpcHandlers(mainWindow, sessionManager, fileWatcher) {
     }
   });
 
+  // ─── ユーザーテンプレート ────────────────────────────────────────
+  ipcMain.handle('get-templates', async () => {
+    return sessionManager.getTemplates();
+  });
+
+  ipcMain.handle('save-templates', async (event, templates) => {
+    sessionManager.saveTemplates(templates);
+    return { success: true };
+  });
+
   // ─── アプリ情報 ─────────────────────────────────────────────────
   ipcMain.handle('get-app-version', () => app.getVersion());
   ipcMain.handle('get-user-data-path', () => app.getPath('userData'));
