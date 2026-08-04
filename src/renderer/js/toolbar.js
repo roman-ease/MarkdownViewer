@@ -6,7 +6,6 @@
  */
 const Toolbar = (() => {
   let _focusMode = false;
-  let _viewMode = 'split'; // 'split' | 'preview'
   let _syncScroll = true;
 
   // ─── Mermaid テンプレート ─────────────────────────────────────────────────
@@ -101,6 +100,12 @@ const Toolbar = (() => {
     // IPC メニューイベント
     _bindIpcEvents();
 
+    // ダイアログ
+    _initTableDialog();
+    _initImageDialog();
+    _initTemplateSaveDialog();
+    Settings.initDialogEvents();
+
     // 設定反映
     const s = Settings.get();
     _syncScroll = s.syncScroll !== false;
@@ -139,7 +144,6 @@ const Toolbar = (() => {
 
   // ─── ビューモード ────────────────────────────────────────────────────────
   function setViewMode(mode) {
-    _viewMode = mode;
     document.body.classList.toggle('view-preview', mode === 'preview');
     document.getElementById('view-split-btn').classList.toggle('active', mode === 'split');
     document.getElementById('view-preview-btn').classList.toggle('active', mode === 'preview');
@@ -511,12 +515,5 @@ const Toolbar = (() => {
     dlg.onclick = (e) => { if (e.target === dlg) dlg.classList.add('hidden'); };
   }
 
-  function initAfterDOM() {
-    _initTableDialog();
-    _initImageDialog();
-    _initTemplateSaveDialog();
-    Settings.initDialogEvents();
-  }
-
-  return { init, initAfterDOM, setViewMode, toggleFocusMode };
+  return { init, setViewMode, toggleFocusMode };
 })();

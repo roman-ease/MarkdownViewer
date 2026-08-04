@@ -1,6 +1,6 @@
 'use strict';
 
-const { app, BrowserWindow, ipcMain, dialog, shell, nativeTheme } = require('electron');
+const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const { buildMenu } = require('./menu');
@@ -102,6 +102,14 @@ async function createWindow() {
   const fileWatcher = new FileWatcher(mainWindow);
   registerIpcHandlers(mainWindow, sessionManager, fileWatcher);
 
+  // セキュリティ: 新規ウィンドウ生成を全面禁止し、アプリ自身(file://)以外への
+  // フレーム遷移をブロックする。プレビュー内に万一注入が起きても、外部オリジンへ
+  // ナビゲートさせない。外部リンクは open-external IPC 経由でのみ開く。
+  mainWindow.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
+  mainWindow.webContents.on('will-navigate', (e, url) => {
+    if (!url.startsWith('file://')) e.preventDefault();
+  });
+
   // HTML ロード
   mainWindow.loadFile(path.join(__dirname, '../renderer/index.html'));
 
@@ -117,6 +125,7 @@ async function createWindow() {
   // ウィンドウサイズ保存
   const saveBounds = () => {
     if (mainWindow.isMinimized()) return;
+    if (!sessionManager.getSettings().rememberWindowSize) return;
     const isMaximized = mainWindow.isMaximized();
     const data = isMaximized
       ? { ...sessionManager.getWindowBounds(), isMaximized: true }

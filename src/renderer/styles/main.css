@@ -220,6 +220,47 @@ body {
 .tab.dragging { opacity: 0.5; }
 .tab.drag-over { border-left: 2px solid var(--tab-active-border); }
 
+/* ─── Tab Groups ─────────────────────────────────────────────────────────── */
+.tab-group-chip {
+  display: flex;
+  align-items: center;
+  height: 36px;
+  padding: 0 10px;
+  cursor: pointer;
+  flex-shrink: 0;
+  font-size: 11px;
+  font-weight: 600;
+  color: #1e1008; /* Dark Espresso — 6色すべてに対して十分なコントラスト */
+  background: var(--group-color);
+  border-right: 1px solid var(--toolbar-border, var(--border-color));
+  border-bottom: 3px solid var(--group-color);
+  user-select: none;
+}
+.tab-group-chip:hover { filter: brightness(1.12); }
+.tab-group-chip.collapsed::after { content: '▸'; margin-left: 6px; }
+.tab-group-name {
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  outline: none;
+}
+.tab-group-name[contenteditable="true"] {
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  padding: 0 3px;
+}
+/* グループ配下のタブは同系色で塗り、下線でグループの範囲を示す */
+.tab.tab-grouped {
+  background: color-mix(in srgb, var(--group-color) 16%, var(--tab-bg));
+  border-bottom: 3px solid var(--group-color);
+}
+.tab.tab-grouped:hover { background: color-mix(in srgb, var(--group-color) 26%, var(--tab-bg)); }
+.tab.tab-grouped.active {
+  background: color-mix(in srgb, var(--group-color) 32%, var(--tab-active-bg));
+  border-top-color: var(--group-color);
+}
+
 #new-tab-btn {
   width: 32px;
   height: 36px;
@@ -297,7 +338,9 @@ body {
 #editor-container .CodeMirror-cursor { border-left: 2px solid var(--editor-cursor); }
 #editor-container .CodeMirror-activeline-background { background: var(--editor-line-active); }
 #editor-container .CodeMirror-selected { background: var(--bg-selection); }
-#editor-container .CodeMirror-scroll { padding-bottom: 80px; }
+/* 末尾の余白は scrollPastEnd アドオンが sizer 側に付ける。
+   .CodeMirror-scroll の padding-bottom は CM の「スクロールバー隠し」用（margin-bottom:-50px と対）
+   なので上書きしないこと */
 
 /* Search highlight in editor */
 #editor-container .cm-searching {

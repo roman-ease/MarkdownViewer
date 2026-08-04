@@ -58,6 +58,7 @@ const Editor = (() => {
       tabSize: settings.tabSize || 2,
       indentWithTabs: false,
       styleActiveLine: true,
+      scrollPastEnd: true, // 最終行が画面上部まで来るまでスクロールできる
       extraKeys: _buildExtraKeys(settings.keybindings),
       placeholder: 'Markdown を入力してください...',
     });
@@ -96,6 +97,9 @@ const Editor = (() => {
       const isDirty = content !== tab.savedContent;
       Tabs.updateTabState(tabId, { content, isDirty });
       Preview.scheduleRender(content, tab.filePath);
+      // パスありタブは 1.5 秒デバウンスで保存（Quill連携リアルタイム同期）
+      const thisTab = Tabs.getTab(tabId);
+      if (isDirty && thisTab?.filePath) App.scheduleQuickSave(tabId);
     });
 
     // カーソル移動
@@ -173,10 +177,6 @@ const Editor = (() => {
     return { line: pos.line + 1, ch: pos.ch + 1 };
   }
 
-  function setScrollTop(top) {
-    if (_cm) _cm.scrollTo(0, top);
-  }
-
   // ─── 書式挿入 ────────────────────────────────────────────────────────────
   function formatWrap(before, after, cm) {
     const editor = cm || _cm;
@@ -210,13 +210,6 @@ const Editor = (() => {
   function insertText(text) {
     if (!_cm) return;
     _cm.replaceSelection(text);
-    _cm.focus();
-  }
-
-  function insertAtLine(text) {
-    if (!_cm) return;
-    const cursor = _cm.getCursor();
-    _cm.replaceRange(text + '\n', { line: cursor.line, ch: 0 });
     _cm.focus();
   }
 
@@ -434,19 +427,16 @@ const Editor = (() => {
   }
 
   return {
-    createInstance,
     activate,
     destroyInstance,
     getValue,
     setValue,
     getScrollTop,
-    setScrollTop,
     getCursor,
     formatWrap,
     insertLink,
     insertImage,
     insertText,
-    insertAtLine,
     insertTable,
     insertTOC,
     toggleTaskItem,

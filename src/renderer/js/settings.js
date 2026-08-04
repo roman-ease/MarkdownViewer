@@ -137,21 +137,15 @@ const Settings = (() => {
   function applyTheme(theme) {
     document.documentElement.setAttribute('data-theme', theme || 'dark');
 
-    // hljs テーマ切替
-    const themeMap = {
-      'github-dark': 'github-dark',
-      'github': 'github',
-      'atom-one-dark': 'atom-one-dark',
-      'vs2015': 'vs2015',
-      'monokai': 'monokai',
-    };
+    // hljs テーマ切替（許可リスト外は github-dark にフォールバック）
+    const HLJS_THEMES = ['github-dark', 'github', 'atom-one-dark', 'vs2015', 'monokai'];
     // auto の場合はアプリテーマに応じて自動選択
     const autoMap = { dark: 'atom-one-dark', default: 'github', light: 'github', sepia: 'github', vaporwave: 'atom-one-dark', terminal: 'vs2015' };
     const syntaxSetting = _settings.syntaxTheme;
     const resolved = (!syntaxSetting || syntaxSetting === 'auto')
-      ? autoMap[theme || 'dark'] || 'github-dark'
+      ? autoMap[theme || 'dark']
       : syntaxSetting;
-    const hljsTheme = themeMap[resolved] || 'github-dark';
+    const hljsTheme = HLJS_THEMES.includes(resolved) ? resolved : 'github-dark';
     const link = document.getElementById('hljs-theme');
     if (link) {
       link.href = `../../node_modules/highlight.js/styles/${hljsTheme}.css`;
@@ -421,5 +415,5 @@ const Settings = (() => {
     return el.checked;
   }
 
-  return { load, save, get, onChange, openDialog, closeDialog, initDialogEvents, DEFAULT_KEYBINDINGS, SHORTCUT_DEFS };
+  return { load, save, get, onChange, openDialog, initDialogEvents, SHORTCUT_DEFS };
 })();

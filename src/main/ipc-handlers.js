@@ -1,6 +1,6 @@
 'use strict';
 
-const { ipcMain, dialog, shell, app, clipboard, Menu } = require('electron');
+const { ipcMain, dialog, shell, app, Menu } = require('electron');
 const path = require('path');
 const fs = require('fs');
 
@@ -99,12 +99,13 @@ function registerIpcHandlers(mainWindow, sessionManager, fileWatcher) {
 
   // ─── 外部ブラウザでリンクを開く ─────────────────────────────────
   ipcMain.handle('open-external', async (event, url) => {
+    // http(s) のみ許可。file:// やカスタムスキームを shell.openExternal に渡すと
+    // ローカルファイル/プログラムの起動に悪用され得るため弾く。
+    if (typeof url !== 'string' || !/^https?:\/\//i.test(url)) {
+      return { success: false, error: 'Blocked non-http(s) URL' };
+    }
     await shell.openExternal(url);
-  });
-
-  // ─── ファイルをエクスプローラーで表示 ───────────────────────────
-  ipcMain.handle('show-item-in-folder', async (event, filePath) => {
-    shell.showItemInFolder(filePath);
+    return { success: true };
   });
 
   // ─── ファイル監視 ───────────────────────────────────────────────
@@ -171,15 +172,6 @@ function registerIpcHandlers(mainWindow, sessionManager, fileWatcher) {
     }
   });
 
-  // ─── ファイル存在確認 ───────────────────────────────────────────
-  ipcMain.handle('file-exists', async (event, filePath) => {
-    try {
-      return fs.existsSync(filePath);
-    } catch {
-      return false;
-    }
-  });
-
   // ─── パス操作 ───────────────────────────────────────────────────
   ipcMain.handle('path-info', async (event, filePath) => {
     return {
@@ -188,14 +180,6 @@ function registerIpcHandlers(mainWindow, sessionManager, fileWatcher) {
       ext: path.extname(filePath),
       name: path.basename(filePath, path.extname(filePath)),
     };
-  });
-
-  ipcMain.handle('path-join', async (event, ...parts) => {
-    return path.join(...parts);
-  });
-
-  ipcMain.handle('path-resolve', async (event, ...parts) => {
-    return path.resolve(...parts);
   });
 
   // ─── 画像を Base64 変換 ─────────────────────────────────────────
@@ -237,7 +221,6 @@ function registerIpcHandlers(mainWindow, sessionManager, fileWatcher) {
 
   // ─── アプリ情報 ─────────────────────────────────────────────────
   ipcMain.handle('get-app-version', () => app.getVersion());
-  ipcMain.handle('get-user-data-path', () => app.getPath('userData'));
 
   // ─── ウィンドウ制御 ─────────────────────────────────────────────
   ipcMain.handle('set-always-on-top', (event, flag) => {

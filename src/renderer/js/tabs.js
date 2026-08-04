@@ -6,9 +6,21 @@
  */
 const Tabs = (() => {
   let _tabs = [];
+  let _groups = []; // { id, name, color, collapsed }
   let _activeTabId = null;
   let _tabCounter = 0;
+  let _groupCounter = 0;
   const _scrollPositions = new Map(); // tabId -> { editor, preview }
+
+  // 書斎パレット（アンティークな色調のまま色相はハッキリ分ける / 蛍光・高彩度は不可）
+  const GROUP_COLORS = [
+    '#d1a13f', // Brass Gold
+    '#c0673c', // Terracotta
+    '#a44a52', // Burgundy
+    '#6f9048', // Moss
+    '#45809e', // Slate Blue
+    '#7d5f9c', // Plum
+  ];
 
   const tabList = () => document.getElementById('tab-list');
   const previewContent = () => document.getElementById('preview-content');
@@ -25,6 +37,7 @@ const Tabs = (() => {
       isDirty: false,
       encoding: options.encoding || Settings.get('encoding') || 'utf8',
       lineEnding: options.lineEnding || Settings.get('lineEnding') || 'lf',
+      groupId: null,
     };
     _tabs.push(tab);
     _renderTabEl(tab);
@@ -54,6 +67,13 @@ const Tabs = (() => {
     _activeTabId = tabId;
     const tab = getTab(tabId);
     if (!tab) return;
+
+    // 折りたたまれたグループのタブを選んだら展開する
+    const g = _groups.find(x => x.id === tab.groupId);
+    if (g && g.collapsed) {
+      g.collapsed = false;
+      _rebuildTabDOM();
+    }
 
     // タブ UI 更新
     document.querySelectorAll('.tab').forEach(el => {
@@ -122,9 +142,9 @@ const Tabs = (() => {
     _tabs.splice(idx, 1);
     _scrollPositions.delete(tabId);
 
-    // DOM から削除
-    const el = tabList().querySelector(`[data-tab-id="${tabId}"]`);
-    if (el) el.remove();
+    // DOM 再構築（空グループの掃除も兼ねる）
+    _normalizeGroups();
+    _rebuildTabDOM();
 
     // 次のタブをアクティブ化
     if (_activeTabId === tabId) {
@@ -206,15 +226,60 @@ const Tabs = (() => {
     await _closeTabsBatch(_tabs.map(t => t.id));
   }
 
-  // ─── タブ右クリックメニュー ──────────────────────────────────────────────
-  function _showTabContextMenu(tabId, x, y) {
+  // ─── タブグループ ────────────────────────────────────────────────────────
+  // 同一グループのタブが連続するように並べ直し、空グループを捨てる
+  function _normalizeGroups() {
+    const out = [];
+    const done = new Set();
+    for (const t of _tabs) {
+      if (!t.groupId) { out.push(t); continue; }
+      if (done.has(t.groupId)) continue;
+      done.add(t.groupId);
+      out.push(..._tabs.filter(x => x.groupId === t.groupId));
+    }
+    _tabs = out;
+    _groups = _groups.filter(g => _tabs.some(t => t.groupId === g.id));
+  }
+
+  function _setTabGroup(tabId, groupId) {
+    const tab = getTab(tabId);
+    if (!tab) return;
+    tab.groupId = groupId;
+    _normalizeGroups();
+    _rebuildTabDOM();
+  }
+
+  function _createGroup(tabId) {
+    const g = {
+      id: `group-${++_groupCounter}`,
+      name: `グループ ${_groupCounter}`,
+      color: GROUP_COLORS[(_groupCounter - 1) % GROUP_COLORS.length],
+      collapsed: false,
+    };
+    _groups.push(g);
+    _setTabGroup(tabId, g.id);
+  }
+
+  function _toggleCollapse(groupId) {
+    const g = _groups.find(x => x.id === groupId);
+    if (!g) return;
+    if (!g.collapsed) {
+      // アクティブタブが中にいる場合は外のタブへ逃がす（外が無ければ畳まない）
+      const active = getActiveTab();
+      if (active && active.groupId === groupId) {
+        const outside = _tabs.find(t => t.groupId !== groupId);
+        if (!outside) return;
+        activateTab(outside.id);
+      }
+    }
+    g.collapsed = !g.collapsed;
+    _rebuildTabDOM();
+  }
+
+  // ─── コンテキストメニュー ────────────────────────────────────────────────
+  function _showMenu(x, y, build) {
     const prev = document.getElementById('tab-context-menu');
     if (prev) prev.remove();
-
-    const idx = _tabs.findIndex(t => t.id === tabId);
-    const hasRight = idx < _tabs.length - 1;
-    const hasLeft  = idx > 0;
-    const hasOther = _tabs.length > 1;
 
     const menu = document.createElement('div');
     menu.id = 'tab-context-menu';
@@ -230,16 +295,7 @@ const Tabs = (() => {
     };
     const sep = () => { const el = document.createElement('div'); el.className = 'dropdown-separator'; return el; };
 
-    menu.append(
-      item('このタブを閉じる',           () => closeTab(tabId)),
-      sep(),
-      item('右のタブをすべて閉じる',     () => _closeTabsToRight(tabId), !hasRight),
-      item('左のタブをすべて閉じる',     () => _closeTabsToLeft(tabId),  !hasLeft),
-      sep(),
-      item('他のタブをすべて閉じる',     () => _closeOtherTabs(tabId),   !hasOther),
-      item('すべてのタブを閉じる',       () => _closeAllTabsMenu()),
-    );
-
+    menu.append(...build(item, sep));
     document.body.appendChild(menu);
 
     // 画面端補正
@@ -249,6 +305,70 @@ const Tabs = (() => {
 
     const close = (e) => { if (!menu.contains(e.target)) { menu.remove(); document.removeEventListener('click', close, true); } };
     setTimeout(() => document.addEventListener('click', close, true), 0);
+  }
+
+  // ─── タブ右クリックメニュー ──────────────────────────────────────────────
+  function _showTabContextMenu(tabId, x, y) {
+    const tab = getTab(tabId);
+    const idx = _tabs.findIndex(t => t.id === tabId);
+    const hasRight = idx < _tabs.length - 1;
+    const hasLeft  = idx > 0;
+    const hasOther = _tabs.length > 1;
+
+    _showMenu(x, y, (item, sep) => [
+      item('このタブを閉じる',           () => closeTab(tabId)),
+      sep(),
+      item('右のタブをすべて閉じる',     () => _closeTabsToRight(tabId), !hasRight),
+      item('左のタブをすべて閉じる',     () => _closeTabsToLeft(tabId),  !hasLeft),
+      sep(),
+      item('他のタブをすべて閉じる',     () => _closeOtherTabs(tabId),   !hasOther),
+      item('すべてのタブを閉じる',       () => _closeAllTabsMenu()),
+      sep(),
+      item('新しいグループに追加',       () => _createGroup(tabId)),
+      ..._groups.filter(g => g.id !== (tab && tab.groupId))
+        .map(g => item(`「${g.name}」に追加`, () => _setTabGroup(tabId, g.id))),
+      item('グループから外す',           () => _setTabGroup(tabId, null), !(tab && tab.groupId)),
+    ]);
+  }
+
+  // ─── グループ右クリックメニュー ──────────────────────────────────────────
+  function _showGroupContextMenu(groupId, x, y) {
+    const g = _groups.find(x2 => x2.id === groupId);
+    if (!g) return;
+    _showMenu(x, y, (item, sep) => [
+      item(g.collapsed ? 'グループを展開' : 'グループを折りたたむ', () => _toggleCollapse(groupId)),
+      item('名前を変更',       () => _startRename(groupId)),
+      item('色を変える',       () => {
+        g.color = GROUP_COLORS[(GROUP_COLORS.indexOf(g.color) + 1) % GROUP_COLORS.length];
+        _rebuildTabDOM();
+      }),
+      sep(),
+      item('グループを解除',   () => {
+        _tabs.filter(t => t.groupId === groupId).forEach(t => { t.groupId = null; });
+        _normalizeGroups();
+        _rebuildTabDOM();
+      }),
+      item('グループのタブをすべて閉じる', () => _closeTabsBatch(_tabs.filter(t => t.groupId === groupId).map(t => t.id))),
+    ]);
+  }
+
+  function _startRename(groupId) {
+    const nameEl = tabList().querySelector(`[data-group-id="${groupId}"] .tab-group-name`);
+    const g = _groups.find(x => x.id === groupId);
+    if (!nameEl || !g) return;
+    nameEl.contentEditable = 'true';
+    nameEl.focus();
+    document.getSelection().selectAllChildren(nameEl);
+    const commit = () => {
+      nameEl.contentEditable = 'false';
+      g.name = nameEl.textContent.trim() || g.name;
+      _rebuildTabDOM();
+    };
+    nameEl.addEventListener('blur', commit, { once: true });
+    nameEl.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); nameEl.blur(); }
+      if (e.key === 'Escape') { nameEl.textContent = g.name; nameEl.blur(); }
+    });
   }
 
   // ─── タブ並び替え ────────────────────────────────────────────────────────
@@ -282,14 +402,43 @@ const Tabs = (() => {
       if (fromIdx === -1 || toIdx === -1) return;
       const [moved] = _tabs.splice(fromIdx, 1);
       _tabs.splice(toIdx, 0, moved);
+      // グループの内側に落ちたら加入、それ以外は離脱
+      const before = _tabs[toIdx - 1], after = _tabs[toIdx + 1];
+      const inside = before && after && before.groupId && before.groupId === after.groupId;
+      moved.groupId = inside ? before.groupId : null;
+      _normalizeGroups();
       _rebuildTabDOM();
     });
   }
 
   // ─── DOM 操作 ────────────────────────────────────────────────────────────
-  function _renderTabEl(tab) {
+  function _renderGroupEl(g) {
     const el = document.createElement('div');
-    el.className = 'tab';
+    el.className = 'tab-group-chip' + (g.collapsed ? ' collapsed' : '');
+    el.dataset.groupId = g.id;
+    el.style.setProperty('--group-color', g.color);
+    el.innerHTML = `<span class="tab-group-name">${_esc(g.name)}</span>`;
+    el.title = g.collapsed ? 'クリックで展開' : 'クリックで折りたたむ';
+    el.addEventListener('click', (e) => {
+      if (e.target.isContentEditable) return;
+      _toggleCollapse(g.id);
+    });
+    el.addEventListener('dblclick', (e) => { e.stopPropagation(); _startRename(g.id); });
+    el.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+      _showGroupContextMenu(g.id, e.clientX, e.clientY);
+    });
+    tabList().appendChild(el);
+  }
+
+  function _renderTabEl(tab) {
+    const group = _groups.find(g => g.id === tab.groupId);
+    const el = document.createElement('div');
+    el.className = 'tab' + (group ? ' tab-grouped' : '');
+    if (group) {
+      el.style.setProperty('--group-color', group.color);
+      if (group.collapsed) el.style.display = 'none';
+    }
     el.dataset.tabId = tab.id;
     el.draggable = true;
     el.innerHTML = `
@@ -323,7 +472,15 @@ const Tabs = (() => {
 
   function _rebuildTabDOM() {
     tabList().innerHTML = '';
-    _tabs.forEach(t => _renderTabEl(t));
+    let prevGroupId = null;
+    _tabs.forEach(t => {
+      if (t.groupId && t.groupId !== prevGroupId) {
+        const g = _groups.find(x => x.id === t.groupId);
+        if (g) _renderGroupEl(g);
+      }
+      prevGroupId = t.groupId;
+      _renderTabEl(t);
+    });
     // アクティブ再適用
     if (_activeTabId) {
       const el = tabList().querySelector(`[data-tab-id="${_activeTabId}"]`);
@@ -388,16 +545,25 @@ const Tabs = (() => {
         isDirty: t.isDirty,
         encoding: t.encoding,
         lineEnding: t.lineEnding,
+        groupId: t.groupId || null,
         scroll: _scrollPositions.get(t.id) || { editor: 0, preview: 0 },
       })),
+      groups: _groups.map(g => ({ ...g })),
       activeTabId: _activeTabId,
       counter: _tabCounter,
+      groupCounter: _groupCounter,
     };
   }
 
   function fromSessionData(data) {
     if (!data || !data.tabs || data.tabs.length === 0) return false;
     _tabCounter = data.counter || 0;
+    _groupCounter = data.groupCounter || 0;
+    // 旧パレットのグループは新パレットへ読み替え
+    _groups = (data.groups || []).map((g, i) => ({
+      ...g,
+      color: GROUP_COLORS.includes(g.color) ? g.color : GROUP_COLORS[i % GROUP_COLORS.length],
+    }));
 
     data.tabs.forEach(savedTab => {
       const tab = {
@@ -409,11 +575,13 @@ const Tabs = (() => {
         isDirty: savedTab.isDirty || false,
         encoding: savedTab.encoding || 'utf8',
         lineEnding: savedTab.lineEnding || 'lf',
+        groupId: savedTab.groupId || null,
       };
       _tabs.push(tab);
       if (savedTab.scroll) _scrollPositions.set(tab.id, savedTab.scroll);
-      _renderTabEl(tab);
     });
+    _normalizeGroups();
+    _rebuildTabDOM();
 
     const targetId = data.activeTabId || (_tabs[0] && _tabs[0].id);
     if (targetId) activateTab(targetId);

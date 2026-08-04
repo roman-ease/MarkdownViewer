@@ -157,7 +157,7 @@ const Outline = (() => {
         && e.key.toUpperCase() === key.toUpperCase();
   }
 
-  return { init, toggle, open, close };
+  return { init, toggle };
 })();
 
 window.Outline = Outline;

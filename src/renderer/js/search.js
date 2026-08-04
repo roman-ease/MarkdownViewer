@@ -8,7 +8,6 @@ const Search = (() => {
   let _overlays = [];
   let _cursor = null;
   let _query = '';
-  let _matchCount = 0;
 
   const panel = () => document.getElementById('search-panel');
   const replaceRow = () => document.getElementById('replace-row');
@@ -59,7 +58,7 @@ const Search = (() => {
   function _doSearch() {
     _clearHighlights();
     _query = searchInput().value;
-    if (!_query) { _matchCount = 0; return; }
+    if (!_query) return;
 
     const cm = Editor.getActiveInstance();
     if (!cm) return;
@@ -69,11 +68,9 @@ const Search = (() => {
 
     // SearchCursor でハイライト
     _cursor = cm.getSearchCursor(query);
-    _matchCount = 0;
 
     cm.operation(() => {
       while (_cursor.findNext()) {
-        _matchCount++;
         _overlays.push(cm.markText(_cursor.from(), _cursor.to(), {
           className: 'cm-searching',
         }));
@@ -204,5 +201,5 @@ const Search = (() => {
     });
   }
 
-  return { init, open, close, replaceOne, replaceAll };
+  return { init, open };
 })();

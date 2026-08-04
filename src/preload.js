@@ -36,7 +36,6 @@ const ON_CHANNELS = new Set([
   'menu-insert-table', 'menu-insert-toc', 'menu-insert-mermaid',
   'menu-settings', 'menu-about', 'menu-shortcut-help',
   'format-bold', 'format-italic', 'format-link',
-  'focus-mode',
   'set-theme', 'set-view-mode',
   'tab-next', 'tab-prev',
   'toggle-focus-mode', 'toggle-sync-scroll',
@@ -72,13 +71,10 @@ contextBridge.exposeInMainWorld('nodePath', {
   basename: (p, ext) => path.basename(p, ext),
   extname: (p) => path.extname(p),
   isAbsolute: (p) => path.isAbsolute(p),
-  resolve: (...args) => path.resolve(...args),
-  sep: path.sep,
+  relative: (from, to) => path.relative(from, to),
 });
 
 contextBridge.exposeInMainWorld('nodeOs', {
-  homedir: () => os.homedir(),
-  platform: () => os.platform(),
   tmpdir: () => os.tmpdir(),
 });
 

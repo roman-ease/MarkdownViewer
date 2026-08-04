@@ -331,10 +331,7 @@ function buildRecentFilesMenu(sessionManager, send) {
   }));
   items.push(
     { type: 'separator' },
-    { label: '履歴をクリア', click: () => {
-      sessionManager.clearRecentFiles();
-      send('recent-files-cleared');
-    }}
+    { label: '履歴をクリア', click: () => sessionManager.clearRecentFiles() }
   );
   return items;
 }

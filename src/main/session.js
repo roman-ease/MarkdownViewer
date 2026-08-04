@@ -25,28 +25,9 @@ const DEFAULT_KEYBINDINGS = {
   'shortcut-help': 'F1',
 };
 
+// 設定値の既定はレンダラー (settings.js の DEFAULTS) が単一ソース。
+// メインプロセスが自前で必要なのは以下だけ（キーバインドはメニュー構築用）。
 const DEFAULT_SETTINGS = {
-  theme: 'light',
-  defaultTheme: 'last',
-  editorFontSize: 14,
-  previewFontSize: 15,
-  editorFont: 'Consolas, "Courier New", monospace',
-  editorLineHeight: 1.6,
-  wordWrap: true,
-  tabSize: 2,
-  spellCheck: false,
-  syncScroll: true,
-  autoSave: false,
-  autoSaveInterval: 30,
-  imageSaveMode: 'relative',
-  imageSaveFolder: '',
-  encoding: 'utf8',
-  lineEnding: 'lf',
-  restoreSession: true,
-  syntaxTheme: 'auto',
-  mermaidTheme: 'auto',
-  katexEnabled: false,
-  openLinksInBrowser: false,
   rememberWindowSize: true,
   alwaysOnTop: false,
   zoomFactor: 1.0,

@@ -1,16 +1,6 @@
 'use strict';
 /* global ipcRenderer, nodePath, hljs, marked, DOMPurify, document, Settings, Notifications, Tabs */
 
-// DOMPurify: file:// src の画像を許可
-DOMPurify.addHook('afterSanitizeAttributes', (node) => {
-  if (node.tagName === 'IMG' && node.getAttribute('src')) {
-    const src = node.getAttribute('src');
-    if (src.startsWith('data:') || src.startsWith('file:')) {
-      node.setAttribute('src', src);
-    }
-  }
-});
-
 const Preview = (() => {
   let _mermaidLoaded = false;
   let _katexLoaded = false;
@@ -156,6 +146,15 @@ const Preview = (() => {
 
   // ─── Mermaid ─────────────────────────────────────────────────────────────
 
+  // 'strict': mermaid が内部で出力 SVG をサニタイズし、click ハンドラ・生 HTML を無効化する。
+  // 'loose' だと untrusted な .md 内の mermaid ブロックから任意スクリプトが注入できてしまう。
+  const _mermaidInitOptions = (theme) => ({
+    startOnLoad: false,
+    theme,
+    securityLevel: 'strict',
+    fontFamily: 'inherit',
+  });
+
   async function renderMermaid(nodes) {
     const wantedTheme = _resolveMermaidTheme();
 
@@ -165,12 +164,7 @@ const Preview = (() => {
         // dynamic import は ts-dedent などのベア指定子を解決できないため使用しない
         if (!globalThis.mermaid) throw new Error('mermaid がロードされていません');
         _mermaidModule = globalThis.mermaid;
-        _mermaidModule.initialize({
-          startOnLoad: false,
-          theme: wantedTheme,
-          securityLevel: 'loose',
-          fontFamily: 'inherit',
-        });
+        _mermaidModule.initialize(_mermaidInitOptions(wantedTheme));
         _mermaidLoaded = true;
         _currentMermaidTheme = wantedTheme;
       } catch (err) {
@@ -179,12 +173,7 @@ const Preview = (() => {
       }
     } else if (_currentMermaidTheme !== wantedTheme) {
       // テーマ変更時に再初期化
-      _mermaidModule.initialize({
-        startOnLoad: false,
-        theme: wantedTheme,
-        securityLevel: 'loose',
-        fontFamily: 'inherit',
-      });
+      _mermaidModule.initialize(_mermaidInitOptions(wantedTheme));
       _currentMermaidTheme = wantedTheme;
     }
 

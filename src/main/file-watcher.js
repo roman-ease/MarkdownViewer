@@ -39,11 +39,6 @@ class FileWatcher {
     }
   }
 
-  unwatchAll() {
-    this.watching.clear();
-    this._stopPolling();
-  }
-
   _ensurePolling() {
     if (this._interval) return;
     this._interval = setInterval(() => this._poll(), this._pollInterval);

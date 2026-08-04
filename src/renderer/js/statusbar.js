@@ -85,5 +85,5 @@ const StatusBar = (() => {
     _update();
   }
 
-  return { init, update: _update };
+  return { init };
 })();

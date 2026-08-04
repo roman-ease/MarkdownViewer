@@ -9,6 +9,7 @@
 const App = (() => {
   let _autoSaveTimer = null;
   let _sessionSaveTimer = null;
+  let _quickSaveTimer = null;
 
   // ─── 起動 ────────────────────────────────────────────────────────────────
   async function init() {
@@ -20,7 +21,6 @@ const App = (() => {
     Search.init();
     StatusBar.init();
     Toolbar.init();
-    Toolbar.initAfterDOM();
     Outline.init();
 
     // ライトボックス
@@ -257,10 +257,28 @@ const App = (() => {
 
   // ─── ファイル変更通知 ────────────────────────────────────────────────────
 
-  function onFileChanged(filePath) {
+  async function onFileChanged(filePath) {
     const tab = Tabs.getAllTabs().find(t => t.filePath === filePath);
     if (!tab) return;
 
+    // 未保存の変更がなければ自動再読み込み（Quill連携のリアルタイム同期）
+    if (!tab.isDirty) {
+      const res = await ipcRenderer.invoke('read-file', filePath);
+      if (res.success && res.content !== tab.savedContent) {
+        // savedContent を先に更新して change ハンドラーが isDirty=false を返すようにする
+        Tabs.updateTabState(tab.id, {
+          content: res.content, savedContent: res.content, isDirty: false,
+          encoding: res.encoding, lineEnding: res.lineEnding,
+        });
+        Editor.setValue(res.content, tab.id);
+        // ウォッチャーの mtime 基準を更新して自己発火を防ぐ
+        await ipcRenderer.invoke('unwatch-file', filePath);
+        await ipcRenderer.invoke('watch-file', filePath);
+      }
+      return;
+    }
+
+    // 未保存の変更がある場合は従来の確認バーを表示
     const bar = document.getElementById('file-change-bar');
     const msg = document.getElementById('file-change-msg');
     msg.textContent = `"${nodePath.basename(filePath)}" が外部で変更されました`;
@@ -270,17 +288,36 @@ const App = (() => {
       bar.classList.add('hidden');
       const res = await ipcRenderer.invoke('read-file', filePath);
       if (res.success) {
-        Editor.setValue(res.content, tab.id);
         Tabs.updateTabState(tab.id, {
           content: res.content, savedContent: res.content, isDirty: false,
           encoding: res.encoding, lineEnding: res.lineEnding,
         });
+        Editor.setValue(res.content, tab.id);
         Notifications.show('再読み込みしました', 'info', 1500);
       }
     };
     document.getElementById('file-change-dismiss').onclick = () => {
       bar.classList.add('hidden');
     };
+  }
+
+  // ─── デバウンス保存（Quill連携用） ──────────────────────────────────────
+
+  function scheduleQuickSave(tabId) {
+    if (_quickSaveTimer) clearTimeout(_quickSaveTimer);
+    _quickSaveTimer = setTimeout(async () => {
+      _quickSaveTimer = null;
+      const tab = Tabs.getTab(tabId);
+      if (!tab || !tab.filePath || !tab.isDirty) return;
+      const content = Editor.getValue(tabId);
+      const res = await ipcRenderer.invoke('write-file', tab.filePath, content, tab.encoding, tab.lineEnding);
+      if (res.success) {
+        Tabs.updateTabState(tabId, { savedContent: content, isDirty: false });
+        // ウォッチャーの mtime を更新して自己発火を防ぐ
+        await ipcRenderer.invoke('unwatch-file', tab.filePath);
+        await ipcRenderer.invoke('watch-file', tab.filePath);
+      }
+    }, 1500);
   }
 
   function onFileDeleted(filePath) {
@@ -448,6 +485,7 @@ const App = (() => {
     onFileChanged,
     onFileDeleted,
     beforeClose,
+    scheduleQuickSave,
   };
 })();
 
